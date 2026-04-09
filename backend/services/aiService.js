@@ -9,7 +9,7 @@ export const generateProductDescription = async (title, category) => {
         'X-Title': 'ShopFusion'
       },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo',
+        model: process.env.OPENROUTER_MODEL || 'minimax/minimax-m2.5',
         messages: [
           {
             role: 'system',
@@ -48,7 +48,7 @@ export const generateChatResponse = async (userMessage, context) => {
         'X-Title': 'ShopFusion'
       },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo',
+        model: process.env.OPENROUTER_MODEL || 'minimax/minimax-m2.5',
         messages: [
           {
             role: 'system',
@@ -90,7 +90,7 @@ export const getProductRecommendations = async (userHistory, products) => {
         'X-Title': 'ShopFusion'
       },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || 'openai/gpt-3.5-turbo',
+        model: process.env.OPENROUTER_MODEL || 'minimax/minimax-m2.5',
         messages: [
           {
             role: 'system',
