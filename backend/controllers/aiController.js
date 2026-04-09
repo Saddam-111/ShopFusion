@@ -54,9 +54,11 @@ export const chatWithAI = async (req, res) => {
     }
 
     const products = await Product.find({ stock: { $gt: 0 } }).select('name category price description _id').limit(10);
+    console.log('Products for AI context:', products.map(p => ({ id: p._id, name: p.name })));
     context += `\n\nProducts: ${products.map(p => `${p.name} ($${p.price})`).join(', ')}`;
     context += `\n\nWhen you recommend products, use this format for clickable links: [PRODUCT:product_id|Product Name]`;
 
+    console.log('Sending to AI with context:', context);
     const response = await generateChatResponse(message, context);
     
     res.status(200).json({
@@ -64,6 +66,7 @@ export const chatWithAI = async (req, res) => {
       response
     });
   } catch (error) {
+    console.error('AI Chat Error:', error);
     res.status(500).json({
       success: false,
       message: error.message
