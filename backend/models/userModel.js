@@ -21,26 +21,30 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "please enter your password"],
-    minLength: [6, "password greater than 8 character"], 
+    minLength: [6, "Password must be at least 6 characters long"], 
     select: false,
   },
   avatar: {
     publicId: {
       type: String,
-      required: true
     },
     url: {
       type: String,
-      required: true,
     }
   },
   role: {
     type: String,
     default: "user"
   },
+  blocked: {
+    type: Boolean,
+    default: false
+  },
   resetPasswordToken: String,
   resetPasswordExpire : Date,
 }, {timestamps: true})
+
+userSchema.index({ email: 1 });
 
 
 //password hashing

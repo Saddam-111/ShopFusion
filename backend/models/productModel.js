@@ -40,7 +40,7 @@ const productSchema = new mongoose.Schema({
   stock: {
     type: Number,
     required: [true, "Enter product stock"],
-    maxLength: [5, "Price cannot exceed 7 digits"],
+    max: [99999, "Stock cannot exceed 99999"],
     default: 1
   },
   numOfReviews: {
@@ -73,6 +73,10 @@ const productSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  viewCount: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -80,5 +84,11 @@ const productSchema = new mongoose.Schema({
 }, {
   timestamps: true
 })
+
+productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ rating: -1 });
 
 export const Product = mongoose.models.Product || mongoose.model("Product", productSchema)

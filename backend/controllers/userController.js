@@ -9,12 +9,7 @@ import crypto from 'crypto'
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if(!req.file){
-      return res.status(404).json({
-        success: false,
-        message: "Avatar is not uploaded"
-      })
-    }
+    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -23,10 +18,9 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    let avatar;
+    let avatar = null;
     if(req.file){
       const uploadResult =await uploadCloudinary(req.file.path, "users_profile_avatars");
-
       avatar = {
         publicId: uploadResult.public_id,
         url: uploadResult.secure_url
@@ -127,8 +121,8 @@ export const requestPasswordReset = async (req, res) => {
     //console.log(resetToken)
     await user.save({ validateBeforeSave: false })
 
-    const resetPasswordURL = `http://localhost/api/v1/reset/${resetToken}`;
-    const message = `Use the following link to reset your password: ${resetPasswordURL}. \n\n This link will expire in 30 minutes. \n\n If you didn't request a password reset. please ignore this message.`
+    const resetPasswordURL = `${process.env.BASE_URL || 'http://localhost:5000'}/api/v1/reset/${resetToken}`;
+    const message = `Use the following link to reset your password: ${resetPasswordURL}. \n\n This link will expire in 15 minutes. \n\n If you didn't request a password reset. please ignore this message.`
     try {
       //send Email
       await sendEmail({
@@ -145,8 +139,12 @@ export const requestPasswordReset = async (req, res) => {
       user.resetPasswordExpire = undefined;
       user.resetPasswordToken = undefined;
       await user.save({ validateBeforeSave: false })
+      return res.status(500).json({
+        success: false,
+        message: "Email could not be sent"
+      });
     }
-    console.log(resetPasswordURL)
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -177,7 +175,7 @@ export const resetPassword = async (req, res) => {
 
     const {password, confirmPassword} = req.body
     if(!password || !confirmPassword){
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: "Invalid Credentials"
       })
@@ -191,10 +189,6 @@ export const resetPassword = async (req, res) => {
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
-    res.status(200).json({
-      success: true, 
-      message: "Password reset Successfully"
-    })
     await user.save()
     sendToken(user, res, 200)
   } catch (error) {
@@ -293,10 +287,21 @@ export const updateProfile = async(req , res) => {
 //Admin = getting user information
 export const getUserList = async (req, res) => {
   try {
-    const user = await User.find();
+    const resultPerPage = 10;
+    const page = Number(req.query.page) || 1;
+    const skip = (page - 1) * resultPerPage;
+
+    const users = await User.find().skip(skip).limit(resultPerPage);
+    const userCount = await User.countDocuments();
+    const totalPages = Math.ceil(userCount / resultPerPage);
+
     res.status(200).json({
       success: true,
-      user
+      users,
+      userCount,
+      resultPerPage,
+      totalPages,
+      currentPage: page
     })
   } catch (error) {
     res.status(500).json({
@@ -344,6 +349,11 @@ export const updateUserRole = async (req , res) => {
         message: "User doesn't exist",
       })
     }
+    res.status(200).json({
+      success: true,
+      message: "User role updated successfully",
+      user
+    })
   } catch (error) {
     res.status(500).json({
       success: false,

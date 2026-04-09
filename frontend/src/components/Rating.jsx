@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IoIosStarOutline, IoIosStar } from "react-icons/io";
 
-const Rating = ({ value, onRatingChange, disabled }) => {
+const Rating = ({ value, onRatingChange, disabled, className = "" }) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(value || 0);
 
@@ -37,10 +37,10 @@ const Rating = ({ value, onRatingChange, disabled }) => {
       stars.push(
         <span
           key={i}
-          onMouseEnter={() => handleMouseEnter(i)} // ✅ call with index
-          onMouseLeave={handleMouseLeave}         // ✅ correct usage
-          onClick={() => handleClick(i)}          // ✅ select on click
-          className={`cursor-pointer ${isFilled ? "text-[#3c433b]" : "text-[#a9c5a0]"}`}
+          onMouseEnter={() => handleMouseEnter(i)}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleClick(i)}
+          className={`cursor-pointer ${isFilled ? "text-[var(--accent-gold)]" : "text-[var(--text-secondary)]"} ${disabled ? "cursor-default" : ""}`}
         >
           {isFilled ? <IoIosStar size={20} /> : <IoIosStarOutline size={20} />}
         </span>
@@ -50,7 +50,7 @@ const Rating = ({ value, onRatingChange, disabled }) => {
   };
 
   return (
-    <div className="flex flex-row">
+    <div className={`flex flex-row ${className}`}>
       {generateStars()}
     </div>
   );

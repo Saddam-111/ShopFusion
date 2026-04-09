@@ -1,20 +1,12 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React from 'react';
 
 const Pagination = ({
   currentPage,
+  totalPages,
   onPageChange,
-  activeClass = "bg-[#1f241f] text-white",
-  nextPageText = "Next",
-  prevPageText = "Prev",
-  firstPageText = "First",
-  lastPageText = "Last",
 }) => {
-  const { totalPages, products } = useSelector((state) => state.product);
+  if (totalPages <= 1) return null;
 
-  if (products.length === 0 || totalPages <= 1) return null;
-
-  // Generate page numbers with a sliding window
   const generatePageNumbers = () => {
     const pageNumbers = [];
     const pageWindow = 2;
@@ -29,54 +21,51 @@ const Pagination = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
-      {/* First + Prev buttons */}
+    <div className="flex flex-wrap items-center justify-center gap-2">
       {currentPage > 1 && (
         <>
           <button
             onClick={() => onPageChange(1)}
-            className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100"
+            className="px-3 py-2 rounded-lg border border-art-gold/30 text-art-silver hover:bg-art-gold/10 hover:text-art-gold transition-colors"
           >
-            {firstPageText}
+            First
           </button>
           <button
             onClick={() => onPageChange(currentPage - 1)}
-            className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100"
+            className="px-3 py-2 rounded-lg border border-art-gold/30 text-art-silver hover:bg-art-gold/10 hover:text-art-gold transition-colors"
           >
-            {prevPageText}
+            Prev
           </button>
         </>
       )}
 
-      {/* Page numbers */}
       {generatePageNumbers().map((number) => (
         <button
           key={number}
           onClick={() => onPageChange(number)}
-          className={`px-3 py-1 rounded-lg border ${
+          className={`px-4 py-2 rounded-lg border transition-colors ${
             currentPage === number
-              ? `${activeClass} border-blue-600`
-              : "border-gray-300 hover:bg-gray-100"
+              ? 'bg-art-gold text-art-black border-art-gold font-semibold'
+              : 'border-art-gold/30 text-art-silver hover:bg-art-gold/10 hover:text-art-gold'
           }`}
         >
           {number}
         </button>
       ))}
 
-      {/* Next + Last buttons */}
       {currentPage < totalPages && (
         <>
           <button
             onClick={() => onPageChange(currentPage + 1)}
-            className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100"
+            className="px-3 py-2 rounded-lg border border-art-gold/30 text-art-silver hover:bg-art-gold/10 hover:text-art-gold transition-colors"
           >
-            {nextPageText}
+            Next
           </button>
           <button
             onClick={() => onPageChange(totalPages)}
-            className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100"
+            className="px-3 py-2 rounded-lg border border-art-gold/30 text-art-silver hover:bg-art-gold/10 hover:text-art-gold transition-colors"
           >
-            {lastPageText}
+            Last
           </button>
         </>
       )}

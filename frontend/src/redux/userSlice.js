@@ -2,16 +2,18 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import axios from "axios";
 
 const baseUrl = import.meta.env.VITE_SERVER_URL;
+axios.defaults.withCredentials = true;
+
 //Register API
 export const register = createAsyncThunk(
   "user/register",
   async (userData, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(`${baseUrl}/api/v1/register`, userData, {
-        headers: { "Content-Type": "multipart/form-data" }, // important for file upload
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true
       });
 
-      console.log("Registration Data:", data);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -25,10 +27,10 @@ export const login = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(`${baseUrl}/api/v1/login`, userData, {
-        headers: { "Content-Type": "application/json" }, // important for file upload
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true
       });
 
-      console.log("Registration Data:", data);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -41,10 +43,13 @@ export const loadUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await axios.get(`${baseUrl}/api/v1/profile`, {
-        withCredentials: true, // if you're using cookies for auth
+        withCredentials: true,
       });
       return data;
     } catch (error) {
+      if (error.response?.status === 401) {
+        return rejectWithValue(null);
+      }
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
@@ -70,6 +75,14 @@ const userSlice = createSlice({
 
     removeSucces: (state) => {
       state.success = null
+    },
+
+    logoutUser: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
+      state.success = null;
     }
   },
   extraReducers: (builder) => {
@@ -126,14 +139,14 @@ const userSlice = createSlice({
       state.user = action.payload.user;
       state.isAuthenticated = Boolean(action.payload?.user);
     })
-    .addCase(loadUser.rejected, (state, action) => {
+    .addCase(loadUser.rejected, (state) => {
       state.loading = false;
-      state.error = action.payload;
+      state.error = null;
       state.user = null;
       state.isAuthenticated = false;
     })
   }
 })
 
-export const {removeErrors, removeSucces} = userSlice.actions
+export const {removeErrors, removeSucces, logoutUser} = userSlice.actions
 export default userSlice.reducer

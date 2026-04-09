@@ -11,7 +11,7 @@ const Login = () => {
   });
   const navigate = useNavigate()
   const { email, password } = formData;
-  const {error, loading, success, isAuthenticated} = useSelector(state => state.user)
+  const {error, success, isAuthenticated} = useSelector(state => state.user)
   const dispatch = useDispatch()
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,16 +19,13 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("hello")
-    dispatch(login({email, password}))
 
     if (!email || !password) {
-      alert("Please fill all fields");
+      toast.error("Please fill all fields");
       return;
     }
 
-    // later integrate API here
-    console.log("Login Data:", formData);
+    dispatch(login({email, password}))
   };
 
   useEffect( () => {
@@ -42,7 +39,7 @@ const Login = () => {
     if(isAuthenticated){
       navigate('/')
     }
-  },[isAuthenticated])
+  },[isAuthenticated, navigate])
 
   useEffect( () => {
     if(success){

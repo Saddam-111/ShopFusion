@@ -59,7 +59,7 @@ const Register = () => {
       dispatch(removeSucces())
       navigate('/login')
     }
-  }, [success]);
+  }, [success, dispatch, navigate]);
 
   return (
     <div className="flex items-center w-full justify-center min-h-screen bg-[#1f241f]">

@@ -1,1 +1,219 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+@theme {
+  --color-art-black: #0a0a0a;
+  --color-art-white: #fafafa;
+  --color-art-gold: #d4af37;
+  --color-art-gold-light: #e8c860;
+  --color-art-gold-dark: #b8960c;
+  --color-art-cream: #f5f0e6;
+  --color-art-charcoal: #1a1a1a;
+  --color-art-silver: #c0c0c0;
+  
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+@layer base {
+  :root {
+    --bg-primary: var(--color-art-black);
+    --bg-secondary: var(--color-art-charcoal);
+    --text-primary: var(--color-art-white);
+    --text-secondary: var(--color-art-silver);
+    --accent-gold: var(--color-art-gold);
+  }
+  
+  .light-mode {
+    --bg-primary: #F9F8F6;
+    --bg-secondary: #EBE5DE;
+    --text-primary: #1A1A1A;
+    --text-secondary: #6C6863;
+  }
+  
+  /* Light mode color overrides for hardcoded colors */
+  .light-mode .bg-art-black { background-color: #F9F8F6 !important; }
+  .light-mode .bg-art-charcoal { background-color: #EBE5DE !important; }
+  .light-mode .bg-art-charcoal\/30 { background-color: rgba(235, 229, 222, 0.5) !important; }
+  .light-mode .bg-art-gold\/20 { background-color: rgba(212, 175, 55, 0.15) !important; }
+  .light-mode .bg-art-gold\/30 { background-color: rgba(212, 175, 55, 0.2) !important; }
+  
+  .light-mode .text-art-white { color: #1A1A1A !important; }
+  .light-mode .text-art-silver { color: #6C6863 !important; }
+  .light-mode .text-art-gold { color: #B8960C !important; }
+  .light-mode .text-art-gold-light { color: #D4AF37 !important; }
+  .light-mode .text-art-gold\/60 { color: rgba(26, 26, 26, 0.6) !important; }
+  .light-mode .text-art-gold\/80 { color: rgba(26, 26, 26, 0.8) !important; }
+  
+  .light-mode .border-art-gold\/10 { border-color: rgba(26, 26, 26, 0.1) !important; }
+  .light-mode .border-art-gold\/20 { border-color: rgba(26, 26, 26, 0.2) !important; }
+  .light-mode .border-art-gold\/30 { border-color: rgba(26, 26, 26, 0.3) !important; }
+  
+  .light-mode .hover\:text-art-gold:hover { color: #B8960C !important; }
+  .light-mode .hover\:text-art-gold-light:hover { color: #D4AF37 !important; }
+  .light-mode .hover\:border-art-gold:hover { border-color: #D4AF37 !important; }
+  .light-mode .hover\:bg-art-gold\/10:hover { background-color: rgba(212, 175, 55, 0.1) !important; }
+  .light-mode .hover\:bg-art-gold:hover { background-color: #D4AF37 !important; }
+  
+  .light-mode .group-hover\:text-art-gold { color: #B8960C !important; }
+  .light-mode .group:hover .group-hover\:text-art-gold { color: #B8960C !important; }
+  
+  .light-mode .focus\:border-art-gold:focus { border-color: #D4AF37 !important; }
+  .light-mode .focus\:border-art-gold:focus-visible { border-color: #D4AF37 !important; }
+  
+  .light-mode .text-green-400 { color: #16a34a !important; }
+  .light-mode .text-green-500 { color: #16a34a !important; }
+  .light-mode .bg-green-400 { background-color: #16a34a !important; }
+  .light-mode .bg-green-500 { background-color: #16a34a !important; }
+  
+  .light-mode .text-red-400 { color: #dc2626 !important; }
+  .light-mode .text-red-500 { color: #dc2626 !important; }
+  .light-mode .bg-red-400 { background-color: #dc2626 !important; }
+  .light-mode .bg-red-500 { background-color: #dc2626 !important; }
+  
+  /* Gradient text in light mode */
+  .light-mode .text-gradient-gold {
+    background: linear-gradient(90deg, #B8960C, #D4AF37, #B8960C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Product Image Zoom */
+  .product-zoom-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .product-zoom-container:hover .zoom-lens {
+    opacity: 1;
+  }
+  
+  .product-zoom-container:hover .zoom-result {
+    opacity: 1;
+  }
+  
+  /* Line clamp for product titles */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.font-art-deco {
+  font-family: var(--font-serif);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.gold-glow {
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.art-deco-border {
+  border: 2px solid var(--color-art-gold);
+  position: relative;
+}
+
+.art-deco-border::before,
+.art-deco-border::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-art-gold);
+}
+
+.art-deco-border::before {
+  top: -5px;
+  left: -5px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.art-deco-border::after {
+  bottom: -5px;
+  right: -5px;
+  border-left: none;
+  border-top: none;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--color-art-gold), var(--color-art-gold-dark));
+  color: var(--color-art-black);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, var(--color-art-gold-light), var(--color-art-gold));
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--color-art-gold);
+  color: var(--color-art-gold);
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: var(--color-art-gold);
+  color: var(--color-art-black);
+}
+
+.card-luxury {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  transition: all 0.3s ease;
+}
+
+.card-luxury:hover {
+  border-color: var(--color-art-gold);
+  box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+}
+
+.input-luxury {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input-luxury:focus {
+  border-color: var(--color-art-gold);
+  outline: none;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.light-mode .input-luxury {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes artDecoShine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.text-gradient-gold {
+  background: linear-gradient(90deg, var(--color-art-gold), var(--color-art-gold-light), var(--color-art-gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: artDecoShine 3s linear infinite;
+}

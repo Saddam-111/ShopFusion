@@ -49,7 +49,7 @@ export const getAllProducts = async (req, res) => {
     const page = Number(req.query.page) || 1;
 
     if(page>totalPages && productCount >0){
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "This page doesn't exist"
       })
@@ -90,6 +90,10 @@ export const getSingleProduct = async (req, res) => {
         message: "Product not found"
       })
     }
+    
+    product.viewCount += 1;
+    await product.save({ validateBeforeSave: false });
+    
     res.status(200).json({
       success: true,
       product
@@ -245,6 +249,19 @@ export const deleteReview = async (req , res) => {
         message: "Product not found"
       })
     }
+    const review = product.reviews.find(review => review._id.toString() === req.query.id.toString())
+    if(!review){
+      return res.status(404).json({
+        success: false,
+        message: "Review not found"
+      })
+    }
+    if(review.user.toString() !== req.user._id.toString()){
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized"
+      })
+    }
     const reviews = product.reviews.filter(review => review._id.toString() !== req.query.id.toString())
     let sum = 0;
     reviews.forEach(review => {
@@ -255,7 +272,7 @@ export const deleteReview = async (req , res) => {
     await Product.findByIdAndUpdate(req.query.productId, 
       {
         reviews, 
-        ratings, 
+        rating: ratings, 
         numOfReviews
       }, {
         new: true, 
@@ -280,10 +297,56 @@ export const deleteReview = async (req , res) => {
 //Admin = getting all product
 export const getAdminProducts = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.stats(200).json({
-      success: true, 
-      products
+    const { page = 1, limit = 10, search, category, stock, minPrice, maxPrice, sort } = req.query;
+    const resultPerPage = parseInt(limit);
+    const skip = (parseInt(page) - 1) * resultPerPage;
+
+    const query = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (stock === 'out') {
+      query.stock = 0;
+    } else if (stock === 'low') {
+      query.stock = { $gt: 0, $lte: 10 };
+    } else if (stock === 'available') {
+      query.stock = { $gt: 10 };
+    }
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseInt(minPrice);
+      if (maxPrice) query.price.$lte = parseInt(maxPrice);
+    }
+
+    let sortOption = { createdAt: -1 };
+    if (sort === 'price_asc') sortOption = { price: 1 };
+    else if (sort === 'price_desc') sortOption = { price: -1 };
+    else if (sort === 'name_asc') sortOption = { name: 1 };
+    else if (sort === 'name_desc') sortOption = { name: -1 };
+    else if (sort === 'stock_asc') sortOption = { stock: 1 };
+    else if (sort === 'stock_desc') sortOption = { stock: -1 };
+
+    const [products, productCount] = await Promise.all([
+      Product.find(query).skip(skip).limit(resultPerPage).sort(sortOption),
+      Product.countDocuments(query)
+    ]);
+
+    const totalPages = Math.ceil(productCount / resultPerPage);
+
+    res.status(200).json({
+      success: true,
+      products,
+      productCount,
+      resultPerPage,
+      totalPages,
+      currentPage: parseInt(page)
     })
   } catch (error) {
     res.status(500).json({

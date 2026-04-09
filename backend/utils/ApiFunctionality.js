@@ -7,10 +7,20 @@ class ApiFunctionality{
 
   search(){
     const keyword = this.queryStr.keyword?{
-      name: {
-        $regex: this.queryStr.keyword,
-        $options: "i"
-      }
+      $or: [
+        {
+          name: {
+            $regex: this.queryStr.keyword,
+            $options: "i"
+          }
+        },
+        {
+          description: {
+            $regex: this.queryStr.keyword,
+            $options: "i"
+          }
+        }
+      ]
     }: {};
     this.query = this.query.find({...keyword})
     return this

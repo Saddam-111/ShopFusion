@@ -69,17 +69,23 @@ const orderSchema = new mongoose.Schema({
   paymentInfo: {
     id: {
       type: String,
-      required: true
+      required: false
     },
     status: {
       type: String,
-      required: true
+      required: false
     }
+  },
+
+  paymentMethod: {
+    type: String,
+    enum: ["PAID", "COD"],
+    default: "PAID"
   },
 
   paidAt: {
     type: Date,
-    required: true
+    required: false
   },
 
   itemPrice: {
@@ -113,5 +119,9 @@ const orderSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ "paymentInfo.status": 1 });
 
 export const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
