@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MdChat, MdClose, MdSend, MdAutoAwesome } from 'react-icons/md';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const AIChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,7 @@ const AIChatbot = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state) => state.user);
+  const navigate = useNavigate();
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -48,6 +50,35 @@ const AIChatbot = () => {
     }
   };
 
+  const renderMessageContent = (content) => {
+    const linkRegex = /\[PRODUCT:([^|]+)\|([^\]]+)\]/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = linkRegex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(content.substring(lastIndex, match.index));
+      }
+      parts.push(
+        <button
+          key={match[1]}
+          onClick={() => navigate(`/product/${match[1]}`)}
+          className="text-[var(--accent-gold)] underline hover:text-[var(--accent-gold)]/80 font-medium mx-1"
+        >
+          {match[2]}
+        </button>
+      );
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < content.length) {
+      parts.push(content.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : content;
+  };
+
   return (
     <>
       <button
@@ -77,7 +108,7 @@ const AIChatbot = () => {
                     ? 'bg-[var(--accent-gold)] text-[var(--bg-primary)]' 
                     : 'bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent-gold)]/20'
                 }`}>
-                  {msg.content}
+                  {msg.role === 'assistant' ? renderMessageContent(msg.content) : msg.content}
                 </div>
               </div>
             ))}

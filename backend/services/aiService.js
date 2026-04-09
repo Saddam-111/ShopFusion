@@ -65,6 +65,7 @@ export const generateChatResponse = async (userMessage, context) => {
     });
 
     const data = await response.json();
+    console.log('OpenRouter response:', data);
     if (!response.ok) {
       throw new Error(data.error?.message || 'OpenRouter API error');
     }

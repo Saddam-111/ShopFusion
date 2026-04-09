@@ -43,7 +43,7 @@ export const chatWithAI = async (req, res) => {
     
     if (userId) {
       const user = await User.findById(userId).select('name role');
-      const orders = await Order.find({ user: userId }).populate('orderItems.product', 'name category price');
+      const orders = await Order.find({ user: userId }).select('orderItems');
       
       context = `User: ${user?.name || 'Guest'}. `;
       
@@ -51,15 +51,11 @@ export const chatWithAI = async (req, res) => {
         const purchasedProducts = orders.flatMap(o => o.orderItems.map(i => i.name)).join(', ');
         context += `Previous purchases: ${purchasedProducts}. `;
       }
-      
-      const userProducts = await User.findById(userId).select('viewHistory');
-      if (userProducts?.viewHistory?.length > 0) {
-        context += `Recently viewed: ${userProducts.viewHistory.slice(-5).join(', ')}.`;
-      }
     }
 
-    const products = await Product.find({ stock: { $gt: 0 } }).select('name category price description').limit(10);
-    context += `\n\nAvailable products:\n${products.map(p => `${p.name} - ${p.category} - $${p.price}`).join('\n')}`;
+    const products = await Product.find({ stock: { $gt: 0 } }).select('name category price description _id').limit(10);
+    context += `\n\nProducts: ${products.map(p => `${p.name} ($${p.price})`).join(', ')}`;
+    context += `\n\nWhen you recommend products, use this format for clickable links: [PRODUCT:product_id|Product Name]`;
 
     const response = await generateChatResponse(message, context);
     
@@ -79,24 +75,17 @@ export const getRecommendations = async (req, res) => {
   try {
     const { userId } = req.params;
     
-    let userHistory = [];
     let recommendedProducts = [];
+    let hasOrderHistory = false;
     
     if (userId) {
-      const user = await User.findById(userId).select('viewHistory');
-      userHistory = user?.viewHistory || [];
+      const orders = await Order.find({ user: userId }).select('orderItems');
+      hasOrderHistory = orders.length > 0;
       
-      if (userHistory.length > 0) {
-        const categories = [...new Set(userHistory.map(h => h.split(' - ')[1]))];
-        const lastViewed = userHistory.slice(-3);
-        
-        recommendedProducts = await Product.find({
-          $or: [
-            { category: { $in: categories } },
-            { name: { $in: lastViewed.map(h => h.split(' - ')[0]) } }
-          ],
-          stock: { $gt: 0 }
-        }).sort({ rating: -1 }).limit(10);
+      if (orders.length > 0) {
+        recommendedProducts = await Product.find({ stock: { $gt: 0 } })
+          .sort({ rating: -1, numOfReviews: -1 })
+          .limit(10);
       }
     }
     
@@ -109,7 +98,7 @@ export const getRecommendations = async (req, res) => {
     res.status(200).json({
       success: true,
       products: recommendedProducts,
-      basedOn: userHistory.length > 0 ? 'user_history' : 'popular'
+      basedOn: hasOrderHistory ? 'user_history' : 'popular'
     });
   } catch (error) {
     res.status(500).json({
