@@ -3,10 +3,9 @@ import { configDotenv } from "dotenv";
 import { connectDB } from "./config/db.js";
 configDotenv()
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 
-//database connecting
 connectDB()
 
 
@@ -16,6 +15,11 @@ app.get('/', (req , res ) => {
   })
 })
 
-app.listen(PORT, () => {
-  // Server started
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 })
+
+process.on('unhandledRejection', (err) => {
+  console.log('Unhandled Rejection:', err.message);
+  server.close(() => process.exit(1));
+});

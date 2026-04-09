@@ -1,10 +1,17 @@
 import jwt from 'jsonwebtoken';
 import RefreshToken from '../models/refreshTokenModel.js';
 
+const getRefreshSecret = () => {
+  if (!process.env.JWT_REFRESH_SECRET) {
+    throw new Error('JWT_REFRESH_SECRET is required for production. Add it to your environment variables.');
+  }
+  return process.env.JWT_REFRESH_SECRET;
+};
+
 export const generateRefreshToken = async (user) => {
   const refreshToken = jwt.sign(
     { id: user._id },
-    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET_KEY + '_refresh',
+    getRefreshSecret(),
     { expiresIn: '7d' }
   );
 
@@ -25,10 +32,7 @@ export const verifyRefreshToken = async (token) => {
       return null;
     }
 
-    const decoded = jwt.verify(
-      token, 
-      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET_KEY + '_refresh'
-    );
+    const decoded = jwt.verify(token, getRefreshSecret());
 
     return decoded;
   } catch (error) {
