@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { logoutUser, loadUser } from '../redux/userSlice';
 import { toast } from 'react-toastify';
-import { FiUser, FiShoppingBag, FiHeart, FiSettings, FiLogOut, FiEdit2, FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiClock, FiXCircle, FiMapPin, FiMail, FiChevronRight, FiSearch, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiUser, FiShoppingBag, FiHeart, FiSettings, FiLogOut, FiEdit2, FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiClock, FiXCircle, FiMapPin, FiMail, FiChevronRight, FiLock, FiEye, FiEyeOff, FiCreditCard, FiTrash2, FiArrowRight } from 'react-icons/fi';
 
 const UserDashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.user);
@@ -46,6 +46,20 @@ const UserDashboard = () => {
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate('/');
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+    try {
+      const baseUrl = import.meta.env.VITE_SERVER_URL;
+      const res = await axios.delete(`${baseUrl}/api/v1/admin/order/${orderId}`, { withCredentials: true });
+      if (res.data.success) {
+        toast.success('Order cancelled successfully');
+        fetchOrders();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to cancel order');
+    }
   };
 
   const handleProfileUpdate = async (e) => {
@@ -195,7 +209,17 @@ const UserDashboard = () => {
           </div>
 
           <div className="lg:col-span-3">
-            {activeTab === 'orders' && <OrdersTab orders={orders} loading={loading} selectedOrder={selectedOrder} setSelectedOrder={setSelectedOrder} getStatusColor={getStatusColor} getStatusIcon={getStatusIcon} />}
+            {activeTab === 'orders' && (
+              <OrdersTab 
+                orders={orders} 
+                loading={loading} 
+                selectedOrder={selectedOrder} 
+                setSelectedOrder={setSelectedOrder} 
+                getStatusColor={getStatusColor} 
+                getStatusIcon={getStatusIcon}
+                handleCancelOrder={handleCancelOrder}
+              />
+            )}
             {activeTab === 'profile' && <ProfileTab user={user} />}
             {activeTab === 'settings' && (
               <SettingsTab
@@ -223,62 +247,131 @@ const UserDashboard = () => {
   );
 };
 
-const OrdersTab = ({ orders, loading, selectedOrder, setSelectedOrder, getStatusColor, getStatusIcon }) => (
-  <div className="space-y-4">
-    {loading ? (
-      <div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-art-gold/30 border-t-art-gold animate-spin rounded-full" /></div>
-    ) : orders.length > 0 ? (
-      <div className="space-y-4">
-        {orders.map((order) => (
-          <div key={order._id} className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20 hover:border-art-gold/40 transition-all cursor-pointer" onClick={() => setSelectedOrder(selectedOrder === order._id ? null : order._id)}>
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 rounded-lg ${getStatusColor(order.orderStatus)}`}>{getStatusIcon(order.orderStatus)}</div>
-                  <div>
-                    <p className="text-art-gold font-semibold">Order #{order._id.slice(-8).toUpperCase()}</p>
-                    <p className="text-art-silver text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 mt-3 text-sm text-art-silver">
-                  <span>{order.orderItems?.length} items</span>
-                  <span className="w-1 h-1 bg-art-silver rounded-full"></span>
-                  <span>₹{order.totalPrice?.toLocaleString('en-IN')}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${getStatusColor(order.orderStatus)}`}>{getStatusIcon(order.orderStatus)}{order.orderStatus}</span>
-                <FiChevronRight className={`text-art-silver transition-transform ${selectedOrder === order._id ? 'rotate-90' : ''}`} />
-              </div>
-            </div>
-            {selectedOrder === order._id && (
-              <div className="mt-6 pt-6 border-t border-art-gold/10">
-                <div className="space-y-3 mb-6">
-                  {order.orderItems?.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4 bg-art-black/50 rounded-lg p-3">
-                      <div className="w-16 h-16 bg-art-gold/10 rounded-lg flex items-center justify-center overflow-hidden">
-                        {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : <FiPackage className="text-art-gold text-2xl" />}
-                      </div>
-                      <div className="flex-1"><p className="text-art-white font-medium">{item.name}</p><p className="text-art-silver text-sm">Qty: {item.quantity} × ₹{item.price}</p></div>
-                      <p className="text-art-gold font-semibold">₹{(item.price * item.quantity).toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between text-lg font-bold border-t border-art-gold/10 pt-2"><span className="text-art-white">Total</span><span className="text-art-gold">₹{order.totalPrice?.toLocaleString()}</span></div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    ) : (
+const OrdersTab = ({ orders, loading, selectedOrder, setSelectedOrder, getStatusColor, getStatusIcon, handleCancelOrder }) => {
+  const navigate = useNavigate();
+
+  if (loading) {
+    return <div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-art-gold/30 border-t-art-gold animate-spin rounded-full" /></div>;
+  }
+
+  if (orders.length === 0) {
+    return (
       <div className="bg-art-charcoal rounded-xl p-12 border border-art-gold/20 text-center">
         <FiShoppingBag className="text-5xl text-art-gold mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-art-white mb-2">No orders yet</h3>
         <Link to="/products" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-art-gold to-art-gold-dark text-art-black font-semibold rounded-lg">Browse Products</Link>
       </div>
-    )}
-  </div>
-);
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {orders.map((order) => (
+        <div key={order._id} className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20 hover:border-art-gold/40 transition-all">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4" onClick={() => setSelectedOrder(selectedOrder === order._id ? null : order._id)}>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-2 rounded-lg ${getStatusColor(order.orderStatus)}`}>{getStatusIcon(order.orderStatus)}</div>
+                <div>
+                  <p className="text-art-gold font-semibold">Order #{order._id.slice(-8).toUpperCase()}</p>
+                  <p className="text-art-silver text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mt-3 text-sm text-art-silver">
+                <span className="flex items-center gap-1"><FiPackage />{order.orderItems?.length} items</span>
+                <span className="w-1 h-1 bg-art-silver rounded-full"></span>
+                <span className="text-art-gold font-bold">₹{order.totalPrice?.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${getStatusColor(order.orderStatus)}`}>{getStatusIcon(order.orderStatus)}{order.orderStatus}</span>
+              <FiChevronRight className={`text-art-silver transition-transform ${selectedOrder === order._id ? 'rotate-90' : ''}`} />
+            </div>
+          </div>
+
+          {selectedOrder === order._id && (
+            <div className="mt-6 pt-6 border-t border-art-gold/10">
+              {/* Order Items */}
+              <h4 className="text-art-white font-semibold mb-4 flex items-center gap-2"><FiPackage /> Order Items</h4>
+              <div className="space-y-3 mb-6">
+                {order.orderItems?.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-4 bg-art-black/50 rounded-lg p-3 hover:bg-art-black/70 transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/product/${item.product}`); }}>
+                    <div className="w-16 h-16 bg-art-gold/10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : <FiPackage className="text-art-gold text-2xl" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-art-white font-medium truncate">{item.name}</p>
+                      <p className="text-art-silver text-sm">Qty: {item.quantity} × ₹{item.price?.toLocaleString()}</p>
+                    </div>
+                    <p className="text-art-gold font-semibold flex-shrink-0">₹{((item.price || 0) * item.quantity).toLocaleString()}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Payment Info */}
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="p-4 bg-art-black/50 rounded-lg">
+                  <h4 className="text-art-gold font-semibold mb-3 flex items-center gap-2"><FiCreditCard /> Payment Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-art-silver">Method</span>
+                      <span className="text-art-white font-medium flex items-center gap-2">
+                        {order.paymentMethod === 'COD' ? <><FiCreditCard className="text-green-500" /> Cash on Delivery</> : <><FiCreditCard className="text-blue-500" /> Online Payment</>}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-art-silver">Status</span>
+                      <span className={order.paymentInfo?.status === 'PAID' ? 'text-green-500' : 'text-yellow-500'}>{order.paymentInfo?.status || 'PENDING'}</span>
+                    </div>
+                    {order.paymentInfo?.id && (
+                      <div className="flex justify-between">
+                        <span className="text-art-silver">Transaction ID</span>
+                        <span className="text-art-white text-xs font-mono">{order.paymentInfo.id}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-art-black/50 rounded-lg">
+                  <h4 className="text-art-gold font-semibold mb-3 flex items-center gap-2"><FiMapPin /> Shipping Address</h4>
+                  <div className="text-sm text-art-white">
+                    <p>{order.shippingInfo?.address}</p>
+                    <p>{order.shippingInfo?.city}, {order.shippingInfo?.state}</p>
+                    <p>{order.shippingInfo?.country} - {order.shippingInfo?.pincode}</p>
+                    <p className="mt-2 text-art-silver">Phone: {order.shippingInfo?.phoneNo}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div className="bg-art-black/30 rounded-lg p-4 mb-6">
+                <h4 className="text-art-gold font-semibold mb-3">Order Summary</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-art-silver">Subtotal</span><span className="text-art-white">₹{order.itemPrice?.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-art-silver">Shipping</span><span className="text-art-white">₹{order.shippingPrice || 0}</span></div>
+                  <div className="flex justify-between"><span className="text-art-silver">Tax</span><span className="text-art-white">₹{order.taxPrice || 0}</span></div>
+                  <div className="flex justify-between text-lg font-bold border-t border-art-gold/10 pt-2 mt-2"><span className="text-art-white">Total</span><span className="text-art-gold">₹{order.totalPrice?.toLocaleString()}</span></div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-3">
+                <button onClick={(e) => { e.stopPropagation(); navigate(`/product/${order.orderItems?.[0]?.product}`); }} className="flex-1 py-3 bg-art-gold/10 text-art-gold rounded-lg hover:bg-art-gold/20 transition-colors font-medium">
+                  View Product
+                </button>
+                {order.orderStatus === 'Processing' && order.paymentMethod === 'COD' && (
+                  <button onClick={(e) => { e.stopPropagation(); handleCancelOrder(order._id); }} className="flex-1 py-3 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors font-medium flex items-center justify-center gap-2">
+                    <FiTrash2 /> Cancel Order
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const ProfileTab = ({ user }) => (
   <div className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20">
