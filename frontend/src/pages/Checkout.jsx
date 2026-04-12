@@ -65,22 +65,25 @@ const Checkout = () => {
       return;
     }
 
-    const result = await dispatch(createPaymentOrder(totalPrice));
-    
-    if (createPaymentOrder.rejected.match(result)) {
-      toast.error(result.payload || "Failed to create payment order");
-      return;
-    }
+    try {
+      const result = await dispatch(createPaymentOrder(totalPrice));
+      
+      if (createPaymentOrder.rejected.match(result)) {
+        toast.error(result.payload || "Failed to create payment order");
+        return;
+      }
 
-    const razorpayOrderId = result.payload.orderId;
-    
-    setTimeout(async () => {
+      const razorpayOrderId = result.payload.orderId;
+      console.log("Razorpay order created:", razorpayOrderId);
+      
       const Razorpay = await loadRazorpay();
       
       if (!Razorpay) {
         toast.error("Failed to load payment system. Please try again.");
         return;
       }
+
+      console.log("Razorpay loaded, key:", import.meta.env.VITE_RAZORPAY_KEY_ID);
 
       const rzp = new Razorpay({
         key_id: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -90,6 +93,7 @@ const Checkout = () => {
         name: "ShopFusion",
         description: "Order Payment",
         handler: async (response) => {
+          console.log("Payment success:", response);
           const verifyResult = await dispatch(verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
@@ -116,22 +120,13 @@ const Checkout = () => {
         console.error("Payment failed:", response.error);
         toast.error(response.error?.description || response.error?.reason || "Payment failed. Please try again.");
       });
-      
-      setTimeout(() => {
-        try {
-          if (!rzp.isOpened()) {
-            toast.error("Payment window blocked. Please disable ad-blocker and try again.");
-          }
-        } catch (e) {}
-      }, 3000);
-      
-      try {
-        rzp.open();
-      } catch (err) {
-        console.error("Razorpay open error:", err);
-        toast.error("Failed to open payment. Please try again.");
-      }
-    }, 500);
+
+      console.log("Opening Razorpay...");
+      rzp.open();
+    } catch (err) {
+      console.error("Payment error:", err);
+      toast.error("Payment error: " + err.message);
+    }
   };
 
   const handleCODPayment = async () => {
