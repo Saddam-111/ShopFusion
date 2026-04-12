@@ -83,7 +83,7 @@ const Checkout = () => {
       console.log("Razorpay loaded, key:", import.meta.env.VITE_RAZORPAY_KEY_ID);
 
       const rzp = new Razorpay({
-        key_id: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         order_id: razorpayOrderId,
         amount: totalPrice * 100,
         currency: "INR",
