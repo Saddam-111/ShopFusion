@@ -10,3 +10,5 @@ services:
         value: production
       - key: PORT
         value: 3000
+      - key: REDIS_URL
+        value: your_redis_connection_string
