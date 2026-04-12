@@ -7,8 +7,9 @@ import { orderRoute } from './routes/orderRoute.js';
 import { cartRouter } from './routes/cartRoute.js';
 import { paymentRouter } from './routes/paymentRoute.js';
 import { adminRouter } from './routes/adminRoutes.js';
+import { authRouter } from './routes/authRoute.js';
 import cors from 'cors'
-import { securityHeaders, generalLimiter, authLimiter } from './middleware/security.js';
+import rateLimit from 'express-rate-limit'
 import { sanitizeInput } from './middleware/validation.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 configDotenv()
@@ -16,26 +17,22 @@ const app = express();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 
-app.use(securityHeaders);
-
-
-app.use(generalLimiter);
-
+app.use(rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 100,
+  message: { success: false, message: "Too many requests" },
+  standardHeaders: true,
+  legacyHeaders: false,
+}));
 
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
 app.use(cookieParser())
-
-
-app.use(cors({
-  origin: FRONTEND_URL,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
-
 
 app.use(sanitizeInput);
 
@@ -46,6 +43,7 @@ app.use('/api/v1', orderRoute);
 app.use('/api/v1', cartRouter);
 app.use('/api/v1', paymentRouter);
 app.use('/api/v1', adminRouter);
+app.use('/api/v1', authRouter);
 
 
 app.get('/api/v1/test', (req, res) => {
