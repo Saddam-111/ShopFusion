@@ -21,7 +21,7 @@ const Checkout = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { products, totalPrice } = useSelector((state) => state.cart);
   const { orderId, loading, success, error } = useSelector((state) => state.payment);
-  
+
   const [shippingInfo, setShippingInfo] = useState({
     address: "",
     city: "",
@@ -62,7 +62,7 @@ const Checkout = () => {
 
     try {
       const result = await dispatch(createPaymentOrder(totalPrice));
-      
+
       if (createPaymentOrder.rejected.match(result)) {
         toast.error(result.payload || "Failed to create payment order");
         return;
@@ -70,14 +70,14 @@ const Checkout = () => {
 
       const razorpayOrderId = result.payload.orderId;
       const Razorpay = await loadRazorpay();
-      
+
       if (!Razorpay) {
         toast.error("Failed to load payment system. Please try again.");
         return;
       }
 
       const rzp = new Razorpay({
-        key_id: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         order_id: razorpayOrderId,
         amount: totalPrice * 100,
         currency: "INR",
@@ -91,7 +91,7 @@ const Checkout = () => {
             cart: products,
             shippingInfo
           }));
-          
+
           if (verifyPayment.rejected.match(verifyResult)) {
             toast.error(verifyResult.payload || "Payment verification failed");
           }
@@ -105,7 +105,7 @@ const Checkout = () => {
           color: "#d4af37"
         }
       });
-      
+
       rzp.on('payment.failed', (response) => {
         toast.error(response.error?.description || response.error?.reason || "Payment failed. Please try again.");
       });
@@ -123,7 +123,7 @@ const Checkout = () => {
     }
 
     const result = await dispatch(createCODOrder(shippingInfo));
-    
+
     if (createCODOrder.rejected.match(result)) {
       toast.error(result.payload || "Failed to place COD order");
       return;
@@ -155,11 +155,11 @@ const Checkout = () => {
     <div className="min-h-screen bg-art-black text-art-white pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-6">
         <h1 className="text-3xl font-serif font-bold text-art-white mb-8">Checkout</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20">
             <h3 className="text-xl font-serif font-bold text-art-white mb-6">Shipping Details</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-art-silver text-sm mb-2">Address *</label>
@@ -172,7 +172,7 @@ const Checkout = () => {
                   className="w-full bg-art-black border border-art-gold/20 rounded-lg px-4 py-3 text-art-white focus:border-art-gold focus:outline-none"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-art-silver text-sm mb-2">City *</label>
@@ -197,7 +197,7 @@ const Checkout = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-art-silver text-sm mb-2">Pincode *</label>
@@ -227,7 +227,7 @@ const Checkout = () => {
 
           <div className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20">
             <h3 className="text-xl font-serif font-bold text-art-white mb-6">Order Summary</h3>
-            
+
             <div className="space-y-3 mb-6">
               {products.map((item) => (
                 <div key={item.product} className="flex justify-between text-art-silver">
@@ -236,7 +236,7 @@ const Checkout = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="border-t border-art-gold/20 pt-4 flex justify-between text-xl font-semibold text-art-white">
               <span>Total</span>
               <span className="text-art-gold">₹{totalPrice.toLocaleString()}</span>
@@ -275,13 +275,13 @@ const Checkout = () => {
                 </label>
               </div>
             </div>
-            
+
             {loading ? (
               <div className="flex justify-center mt-6">
                 <div className="w-10 h-10 border-4 border-art-gold/30 border-t-art-gold animate-spin rounded-full" />
               </div>
             ) : (
-              <button 
+              <button
                 className="w-full mt-6 px-8 py-3 bg-gradient-to-r from-art-gold to-art-gold-dark text-art-black font-semibold rounded-lg hover:shadow-lg hover:shadow-art-gold/30 transition-all"
                 onClick={handlePlaceOrder}
               >
