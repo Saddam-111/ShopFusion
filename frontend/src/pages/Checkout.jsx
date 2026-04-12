@@ -9,14 +9,9 @@ const loadRazorpay = () => {
   return new Promise((resolve) => {
     if (window.Razorpay) {
       resolve(window.Razorpay);
-      return;
+    } else {
+      resolve(null);
     }
-    const script = document.createElement("script");
-    script.src = "https://cdn.razorpay.com/sdk/1.3.0/razorpay.js";
-    script.async = true;
-    script.onload = () => resolve(window.Razorpay);
-    script.onerror = () => resolve(null);
-    document.head.appendChild(script);
   });
 };
 
@@ -34,7 +29,9 @@ const Checkout = () => {
     pincode: "",
     phoneNo: ""
   });
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+    const [paymentMethod, setPaymentMethod] = useState("razorpay");
+    
+    console.log("Checkout render, totalPrice:", totalPrice, "products:", products?.length);
 
   useEffect(() => {
     if (!isAuthenticated) {
