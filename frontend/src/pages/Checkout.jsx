@@ -29,9 +29,7 @@ const Checkout = () => {
     pincode: "",
     phoneNo: ""
   });
-    const [paymentMethod, setPaymentMethod] = useState("razorpay");
-    
-    console.log("Checkout render, totalPrice:", totalPrice, "products:", products?.length);
+  const [paymentMethod, setPaymentMethod] = useState("razorpay");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -71,8 +69,6 @@ const Checkout = () => {
       }
 
       const razorpayOrderId = result.payload.orderId;
-      console.log("Razorpay order created:", razorpayOrderId);
-      
       const Razorpay = await loadRazorpay();
       
       if (!Razorpay) {
@@ -80,17 +76,14 @@ const Checkout = () => {
         return;
       }
 
-      console.log("Razorpay loaded, key:", import.meta.env.VITE_RAZORPAY_KEY_ID);
-
       const rzp = new Razorpay({
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key_id: import.meta.env.VITE_RAZORPAY_KEY_ID,
         order_id: razorpayOrderId,
         amount: totalPrice * 100,
         currency: "INR",
         name: "ShopFusion",
         description: "Order Payment",
         handler: async (response) => {
-          console.log("Payment success:", response);
           const verifyResult = await dispatch(verifyPayment({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
@@ -114,14 +107,11 @@ const Checkout = () => {
       });
       
       rzp.on('payment.failed', (response) => {
-        console.error("Payment failed:", response.error);
         toast.error(response.error?.description || response.error?.reason || "Payment failed. Please try again.");
       });
 
-      console.log("Opening Razorpay...");
       rzp.open();
     } catch (err) {
-      console.error("Payment error:", err);
       toast.error("Payment error: " + err.message);
     }
   };

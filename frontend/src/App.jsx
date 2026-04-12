@@ -30,8 +30,6 @@ import AIChatbot from "./components/AIChatbot";
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.user);
   
-  console.log('AdminRoute - loading:', loading, 'isAuthenticated:', isAuthenticated, 'user role:', user?.role);
-  
   if (loading) {
     return (
       <div className="min-h-screen bg-art-black flex items-center justify-center">
@@ -41,16 +39,13 @@ const AdminRoute = ({ children }) => {
   }
   
   if (!isAuthenticated) {
-    console.log('AdminRoute - Redirecting to /login (not authenticated)');
     return <Navigate to="/login" />;
   }
   
   if (user?.role !== 'admin') {
-    console.log('AdminRoute - Redirecting to / (not admin, role:', user?.role, ')');
     return <Navigate to="/" />;
   }
   
-  console.log('AdminRoute - Access granted');
   return <AdminLayout>{children}</AdminLayout>;
 };
 
