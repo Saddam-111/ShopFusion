@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { logoutUser } from '../redux/userSlice';
-import { FiUser, FiShoppingBag, FiHeart, FiSettings, FiLogOut, FiEdit2, FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiClock, FiXCircle, FiMapPin, FiPhone, FiMail, FiChevronRight, FiSearch } from 'react-icons/fi';
+import { logoutUser, loadUser } from '../redux/userSlice';
+import { toast } from 'react-toastify';
+import { FiUser, FiShoppingBag, FiHeart, FiSettings, FiLogOut, FiEdit2, FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiClock, FiXCircle, FiMapPin, FiPhone, FiMail, FiChevronRight, FiSearch, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const UserDashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.user);
@@ -13,6 +14,17 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  
+  // Edit Profile State
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [profileLoading, setProfileLoading] = useState(false);
+  
+  // Change Password State
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({ old: false, new: false, confirm: false });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -20,7 +32,8 @@ const UserDashboard = () => {
       return;
     }
     fetchOrders();
-  }, [isAuthenticated, navigate]);
+    setProfileForm({ name: user?.name || '', email: user?.email || '' });
+  }, [isAuthenticated, navigate, user]);
 
   const fetchOrders = async () => {
     try {
@@ -37,6 +50,63 @@ const UserDashboard = () => {
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate('/');
+  };
+
+  // Profile Update Handler
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    if (!profileForm.name || !profileForm.email) {
+      toast.error('Please fill all fields');
+      return;
+    }
+    setProfileLoading(true);
+    try {
+      const baseUrl = import.meta.env.VITE_SERVER_URL;
+      const res = await axios.post(`${baseUrl}/api/v1/profile/update`, profileForm, { withCredentials: true });
+      if (res.data.success) {
+        toast.success('Profile updated successfully');
+        dispatch(loadUser());
+        setIsEditing(false);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // Password Change Handler
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error('Please fill all fields');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const baseUrl = import.meta.env.VITE_SERVER_URL;
+      const res = await axios.post(`${baseUrl}/api/v1/password/update`, 
+        { oldPassword: passwordForm.oldPassword, newPassword: passwordForm.newPassword },
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        toast.success('Password changed successfully');
+        setIsChangingPassword(false);
+        setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -64,6 +134,7 @@ const UserDashboard = () => {
   const tabs = [
     { id: 'orders', label: 'My Orders', icon: <FiShoppingBag /> },
     { id: 'profile', label: 'My Profile', icon: <FiUser /> },
+    { id: 'settings', label: 'Settings', icon: <FiSettings /> },
   ];
 
   return (
@@ -434,11 +505,195 @@ const UserDashboard = () => {
                       <p className="text-art-silver text-sm">Browse products</p>
                     </Link>
 
-                    <button className="p-4 bg-art-black/50 rounded-lg border border-art-gold/10 hover:border-art-gold/30 transition-all group text-left">
-                      <FiSettings className="text-2xl text-art-gold mb-2 group-hover:scale-110 transition-transform" />
-                      <p className="text-art-white font-medium">Settings</p>
-                      <p className="text-art-silver text-sm">Manage account</p>
+            {activeTab === 'settings' && (
+              <div className="space-y-6">
+                {/* Edit Profile Section */}
+                <div className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-serif font-bold text-art-white flex items-center gap-2">
+                      <FiEdit2 />
+                      Edit Profile
+                    </h2>
+                    <button 
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="flex items-center gap-2 px-4 py-2 bg-art-gold/10 text-art-gold rounded-lg hover:bg-art-gold/20 transition-colors"
+                    >
+                      {isEditing ? 'Cancel' : <><FiEdit2 /> Edit</>}
                     </button>
+                  </div>
+                  
+                  {isEditing ? (
+                    <form onSubmit={handleProfileUpdate} className="space-y-4">
+                      <div>
+                        <label className="block text-art-silver text-sm mb-2">Name</label>
+                        <input
+                          type="text"
+                          value={profileForm.name}
+                          onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                          className="w-full bg-art-black border border-art-gold/20 rounded-lg px-4 py-3 text-art-white focus:border-art-gold focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-art-silver text-sm mb-2">Email</label>
+                        <input
+                          type="email"
+                          value={profileForm.email}
+                          onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                          className="w-full bg-art-black border border-art-gold/20 rounded-lg px-4 py-3 text-art-white focus:border-art-gold focus:outline-none"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={profileLoading}
+                        className="w-full py-3 bg-art-gold text-art-black rounded-lg hover:bg-art-gold-dark transition-colors font-medium disabled:opacity-50"
+                      >
+                        {profileLoading ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="flex items-center gap-4 p-4 bg-art-black/50 rounded-lg">
+                        <div className="w-12 h-12 bg-art-gold/10 rounded-lg flex items-center justify-center">
+                          <FiUser className="text-art-gold text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-art-silver text-sm">Name</p>
+                          <p className="text-art-white font-medium">{user?.name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 p-4 bg-art-black/50 rounded-lg">
+                        <div className="w-12 h-12 bg-art-gold/10 rounded-lg flex items-center justify-center">
+                          <FiMail className="text-art-gold text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-art-silver text-sm">Email</p>
+                          <p className="text-art-white font-medium">{user?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Change Password Section */}
+                <div className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-serif font-bold text-art-white flex items-center gap-2">
+                      <FiLock />
+                      Change Password
+                    </h2>
+                    <button 
+                      onClick={() => setIsChangingPassword(!isChangingPassword)}
+                      className="flex items-center gap-2 px-4 py-2 bg-art-gold/10 text-art-gold rounded-lg hover:bg-art-gold/20 transition-colors"
+                    >
+                      {isChangingPassword ? 'Cancel' : <><FiLock /> Change</>}
+                    </button>
+                  </div>
+                  
+                  {isChangingPassword ? (
+                    <form onSubmit={handlePasswordChange} className="space-y-4">
+                      <div>
+                        <label className="block text-art-silver text-sm mb-2">Current Password</label>
+                        <div className="relative">
+                          <input
+                            type={showPasswords.old ? 'text' : 'password'}
+                            value={passwordForm.oldPassword}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                            className="w-full bg-art-black border border-art-gold/20 rounded-lg px-4 py-3 pr-12 text-art-white focus:border-art-gold focus:outline-none"
+                            placeholder="Enter current password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({ ...showPasswords, old: !showPasswords.old })}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-art-silver hover:text-art-gold"
+                          >
+                            {showPasswords.old ? <FiEyeOff /> : <FiEye />}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-art-silver text-sm mb-2">New Password</label>
+                        <div className="relative">
+                          <input
+                            type={showPasswords.new ? 'text' : 'password'}
+                            value={passwordForm.newPassword}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                            className="w-full bg-art-black border border-art-gold/20 rounded-lg px-4 py-3 pr-12 text-art-white focus:border-art-gold focus:outline-none"
+                            placeholder="Enter new password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-art-silver hover:text-art-gold"
+                          >
+                            {showPasswords.new ? <FiEyeOff /> : <FiEye />}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-art-silver text-sm mb-2">Confirm New Password</label>
+                        <div className="relative">
+                          <input
+                            type={showPasswords.confirm ? 'text' : 'password'}
+                            value={passwordForm.confirmPassword}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                            className="w-full bg-art-black border border-art-gold/20 rounded-lg px-4 py-3 pr-12 text-art-white focus:border-art-gold focus:outline-none"
+                            placeholder="Confirm new password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-art-silver hover:text-art-gold"
+                          >
+                            {showPasswords.confirm ? <FiEyeOff /> : <FiEye />}
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="w-full py-3 bg-art-gold text-art-black rounded-lg hover:bg-art-gold-dark transition-colors font-medium disabled:opacity-50"
+                      >
+                        {passwordLoading ? 'Changing...' : 'Change Password'}
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="flex items-center gap-4 p-4 bg-art-black/50 rounded-lg">
+                      <div className="w-12 h-12 bg-art-gold/10 rounded-lg flex items-center justify-center">
+                        <FiLock className="text-art-gold text-xl" />
+                      </div>
+                      <div>
+                        <p className="text-art-white font-medium">Password</p>
+                        <p className="text-art-silver text-sm">••••••••</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Account Info */}
+                <div className="bg-art-charcoal rounded-xl p-6 border border-art-gold/20">
+                  <h2 className="text-xl font-serif font-bold text-art-white mb-6">Account Information</h2>
+                  <div className="space-y-4">
+                    <div className="flex justify-between py-3 border-b border-art-gold/10">
+                      <span className="text-art-silver">Account Type</span>
+                      <span className="text-art-gold capitalize">{user?.role}</span>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-art-gold/10">
+                      <span className="text-art-silver">Member Since</span>
+                      <span className="text-art-white">
+                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { 
+                          day: 'numeric', 
+                          month: 'long', 
+                          year: 'numeric' 
+                        }) : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-3">
+                      <span className="text-art-silver">Status</span>
+                      <span className="text-green-500 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Active
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
