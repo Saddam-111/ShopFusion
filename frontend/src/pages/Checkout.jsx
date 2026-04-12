@@ -82,7 +82,7 @@ const Checkout = () => {
       }
 
       const rzp = new Razorpay({
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key_id: import.meta.env.VITE_RAZORPAY_KEY_ID,
         order_id: razorpayOrderId,
         amount: totalPrice * 100,
         currency: "INR",
