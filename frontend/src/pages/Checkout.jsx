@@ -12,10 +12,11 @@ const loadRazorpay = () => {
       return;
     }
     const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/razorpay.js";
+    script.src = "https://cdn.razorpay.com/sdk/1.3.0/razorpay.js";
+    script.async = true;
     script.onload = () => resolve(window.Razorpay);
     script.onerror = () => resolve(null);
-    document.body.appendChild(script);
+    document.head.appendChild(script);
   });
 };
 
@@ -112,10 +113,24 @@ const Checkout = () => {
       });
       
       rzp.on('payment.failed', (response) => {
-        toast.error(response.error.description || "Payment failed");
+        console.error("Payment failed:", response.error);
+        toast.error(response.error?.description || response.error?.reason || "Payment failed. Please try again.");
       });
       
-      rzp.open();
+      setTimeout(() => {
+        try {
+          if (!rzp.isOpened()) {
+            toast.error("Payment window blocked. Please disable ad-blocker and try again.");
+          }
+        } catch (e) {}
+      }, 3000);
+      
+      try {
+        rzp.open();
+      } catch (err) {
+        console.error("Razorpay open error:", err);
+        toast.error("Failed to open payment. Please try again.");
+      }
     }, 500);
   };
 
