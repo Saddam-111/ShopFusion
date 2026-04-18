@@ -8,6 +8,7 @@ import { cartRouter } from './routes/cartRoute.js';
 import { paymentRouter } from './routes/paymentRoute.js';
 import { adminRouter } from './routes/adminRoutes.js';
 import { authRouter } from './routes/authRoute.js';
+import { couponRouter } from './routes/couponRoute.js';
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import { sanitizeInput } from './middleware/validation.js';
@@ -50,6 +51,7 @@ app.use('/api/v1', cartRouter);
 app.use('/api/v1', paymentRouter);
 app.use('/api/v1', adminRouter);
 app.use('/api/v1', authRouter);
+app.use('/api/v1', couponRouter);
 
 
 app.get('/api/v1/test', (req, res) => {

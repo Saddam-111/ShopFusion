@@ -15,6 +15,7 @@ import AdminDashboard from "./Admin/AdminDashboard";
 import AdminProducts from "./Admin/AdminProducts";
 import AdminOrders from "./Admin/AdminOrders";
 import AdminUsers from "./Admin/AdminUsers";
+import AdminCoupons from "./Admin/AdminCoupons";
 import AdminLayout from "./Admin/AdminLayout";
 
 import { ToastContainer } from "react-toastify";
@@ -90,8 +91,9 @@ const App = () => {
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
               <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-              <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-              
+<Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+              <Route path="/admin/coupons" element={<AdminRoute><AdminCoupons /></AdminRoute>} />
+               
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
             <AIChatbot />

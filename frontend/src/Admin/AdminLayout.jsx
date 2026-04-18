@@ -10,7 +10,8 @@ import {
   MdMenu,
   MdClose,
   MdChevronLeft,
-  MdChevronRight
+  MdChevronRight,
+  MdConfirmationNumber
 } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../redux/userSlice';
@@ -33,6 +34,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/products', icon: <MdInventory />, label: 'Products' },
     { path: '/admin/orders', icon: <MdShoppingCart />, label: 'Orders' },
     { path: '/admin/users', icon: <MdPeople />, label: 'Users' },
+    { path: '/admin/coupons', icon: <MdConfirmationNumber />, label: 'Coupons' },
   ];
 
   return (

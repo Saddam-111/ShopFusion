@@ -10,6 +10,9 @@ export const getCart = async (req, res) => {
       await cart.save();
     }
     
+    cart.calculateTotal();
+    await cart.save();
+    
     res.status(200).json({
       success: true,
       cart
@@ -74,6 +77,52 @@ export const addToCart = async (req, res) => {
     }
     
     cart.calculateTotal();
+    
+    if (cart.coupon && cart.coupon.code) {
+      const { Coupon } = await import("../models/couponModel.js");
+      const coupon = await Coupon.findOne({ code: cart.coupon.code });
+      
+      if (coupon && cart.totalPrice >= coupon.minCartValue) {
+        let eligibleAmount = cart.totalPrice;
+        
+        if (coupon.applicableCategories.length > 0 || coupon.applicableProducts.length > 0) {
+          let categoryDiscount = 0;
+          let productDiscount = 0;
+          
+          for (const item of cart.products) {
+            const prod = await Product.findById(item.product);
+            if (prod) {
+              const itemTotal = item.price * item.quantity;
+              if (coupon.applicableCategories.includes(prod.category)) {
+                categoryDiscount += itemTotal;
+              }
+              if (coupon.applicableProducts.some(p => p.toString() === item.product.toString())) {
+                productDiscount += itemTotal;
+              }
+            }
+          }
+          eligibleAmount = Math.max(categoryDiscount, productDiscount);
+        }
+        
+        let discount = 0;
+        if (coupon.discountType === "percentage") {
+          discount = (eligibleAmount * coupon.discountValue) / 100;
+          if (coupon.maxDiscount !== null && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount;
+          }
+        } else if (coupon.discountType === "flat") {
+          discount = coupon.discountValue;
+          if (discount > eligibleAmount) {
+            discount = eligibleAmount;
+          }
+        }
+        
+        const finalTotal = cart.totalPrice - discount;
+        cart.coupon.discount = discount;
+        cart.coupon.finalTotal = finalTotal < 0 ? 0 : finalTotal;
+      }
+    }
+    
     await cart.save();
     
     res.status(200).json({
@@ -128,6 +177,50 @@ export const updateCartQuantity = async (req, res) => {
       cart.products[itemIndex].quantity = quantity;
     }
     
+    if (cart.coupon) {
+      const { Coupon } = await import("../models/couponModel.js");
+      const coupon = await Coupon.findOne({ code: cart.coupon.code });
+      
+      if (coupon) {
+        let eligibleAmount = cart.totalPrice;
+        if (coupon.applicableCategories.length > 0 || coupon.applicableProducts.length > 0) {
+          let categoryDiscount = 0;
+          let productDiscount = 0;
+          
+          for (const item of cart.products) {
+            const prod = await Product.findById(item.product);
+            if (prod) {
+              const itemTotal = item.price * item.quantity;
+              if (coupon.applicableCategories.includes(prod.category)) {
+                categoryDiscount += itemTotal;
+              }
+              if (coupon.applicableProducts.some(p => p.toString() === item.product.toString())) {
+                productDiscount += itemTotal;
+              }
+            }
+          }
+          eligibleAmount = Math.max(categoryDiscount, productDiscount);
+        }
+        
+        let discount = 0;
+        if (coupon.discountType === "percentage") {
+          discount = (eligibleAmount * coupon.discountValue) / 100;
+          if (coupon.maxDiscount !== null && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount;
+          }
+        } else if (coupon.discountType === "flat") {
+          discount = coupon.discountValue;
+          if (discount > eligibleAmount) {
+            discount = eligibleAmount;
+          }
+        }
+        
+        const finalTotal = cart.totalPrice - discount;
+        cart.coupon.discount = discount;
+        cart.coupon.finalTotal = finalTotal < 0 ? 0 : finalTotal;
+      }
+    }
+    
     cart.calculateTotal();
     await cart.save();
     
@@ -160,6 +253,50 @@ export const removeFromCart = async (req, res) => {
     cart.products = cart.products.filter(
       item => item.product.toString() !== productId
     );
+    
+    if (cart.coupon) {
+      const { Coupon } = await import("../models/couponModel.js");
+      const coupon = await Coupon.findOne({ code: cart.coupon.code });
+      
+      if (coupon) {
+        let eligibleAmount = cart.totalPrice;
+        if (coupon.applicableCategories.length > 0 || coupon.applicableProducts.length > 0) {
+          let categoryDiscount = 0;
+          let productDiscount = 0;
+          
+          for (const item of cart.products) {
+            const prod = await Product.findById(item.product);
+            if (prod) {
+              const itemTotal = item.price * item.quantity;
+              if (coupon.applicableCategories.includes(prod.category)) {
+                categoryDiscount += itemTotal;
+              }
+              if (coupon.applicableProducts.some(p => p.toString() === item.product.toString())) {
+                productDiscount += itemTotal;
+              }
+            }
+          }
+          eligibleAmount = Math.max(categoryDiscount, productDiscount);
+        }
+        
+        let discount = 0;
+        if (coupon.discountType === "percentage") {
+          discount = (eligibleAmount * coupon.discountValue) / 100;
+          if (coupon.maxDiscount !== null && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount;
+          }
+        } else if (coupon.discountType === "flat") {
+          discount = coupon.discountValue;
+          if (discount > eligibleAmount) {
+            discount = eligibleAmount;
+          }
+        }
+        
+        const finalTotal = cart.totalPrice - discount;
+        cart.coupon.discount = discount;
+        cart.coupon.finalTotal = finalTotal < 0 ? 0 : finalTotal;
+      }
+    }
     
     cart.calculateTotal();
     await cart.save();
