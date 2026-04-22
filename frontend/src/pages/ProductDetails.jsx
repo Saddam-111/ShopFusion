@@ -25,7 +25,6 @@ const ProductDetails = () => {
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
   
-  // Zoom state
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [isZoomed, setIsZoomed] = useState(false);
   const imageContainerRef = useRef(null);
@@ -50,11 +49,9 @@ const ProductDetails = () => {
         { withCredentials: true }
       );
       
-      // Related products: same category, excluding current product
       const related = (data.products || []).filter(p => p._id !== id).slice(0, 4);
       setRelatedProducts(related);
       
-      // Recommended: products from other categories or best rated
       const recommended = (data.products || [])
         .filter(p => p._id !== id)
         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
@@ -121,8 +118,8 @@ const ProductDetails = () => {
 
   const ProductCard = ({ product }) => (
     <Link to={`/product/${product._id}`} className="block group">
-      <div className="bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--accent-gold)]/20 hover:border-[var(--accent-gold)] transition-all hover:-translate-y-1">
-        <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-[var(--bg-primary)]">
+      <div className="bg-white rounded-corners-lg p-4 border border-forest/10 hover:border-forest/30 transition-all hover:-translate-y-1">
+        <div className="aspect-square mb-3 overflow-hidden rounded-corners-lg bg-olive">
           {product.images?.[0] ? (
             <img
               src={product.images[0].url}
@@ -130,19 +127,19 @@ const ProductDetails = () => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)]">
+            <div className="w-full h-full flex items-center justify-center text-forest/40">
               No Image
             </div>
           )}
         </div>
-        <h4 className="text-[var(--text-primary)] font-medium text-sm line-clamp-2 group-hover:text-[var(--accent-gold)] transition-colors">
+        <h4 className="text-forest font-medium text-sm line-clamp-2 group-hover:text-forest transition-colors">
           {product.name}
         </h4>
         <div className="flex items-center gap-2 mt-2">
-          <span className="text-[var(--accent-gold)] font-bold">₹{product.price?.toLocaleString()}</span>
+          <span className="text-forest font-bold">₹{product.price?.toLocaleString()}</span>
           {product.rating > 0 && (
             <div className="flex items-center gap-1">
-              <span className="text-xs bg-[var(--accent-gold)] text-[var(--bg-primary)] px-1.5 py-0.5 rounded">
+              <span className="text-xs bg-forest/10 text-forest px-1.5 py-0.5 rounded">
                 {product.rating.toFixed(1)} ★
               </span>
             </div>
@@ -154,18 +151,18 @@ const ProductDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-24 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[var(--accent-gold)]/30 border-t-[var(--accent-gold)] animate-spin rounded-full" />
+      <div className="min-h-screen bg-cream text-forest pt-24 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-forest/30 border-t-forest animate-spin rounded-full" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-24 flex items-center justify-center">
+      <div className="min-h-screen bg-cream text-forest pt-24 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 text-xl mb-4">{error}</p>
-          <Link to="/products" className="text-[var(--accent-gold)] hover:underline">Go back to products</Link>
+          <Link to="/products" className="text-forest hover:underline">Go back to products</Link>
         </div>
       </div>
     );
@@ -173,28 +170,27 @@ const ProductDetails = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-24 flex items-center justify-center">
+      <div className="min-h-screen bg-cream text-forest pt-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[var(--text-secondary)] text-xl mb-4">Product not found</p>
-          <Link to="/products" className="text-[var(--accent-gold)] hover:underline">Go back to products</Link>
+          <p className="text-forest/60 text-xl mb-4">Product not found</p>
+          <Link to="/products" className="text-forest hover:underline">Go back to products</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] pt-24 pb-12">
+    <div className="min-h-screen bg-cream text-forest pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-6">
-        <Link to="/products" className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--accent-gold)] mb-8 transition-colors">
+        <Link to="/products" className="inline-flex items-center gap-2 text-forest/60 hover:text-forest mb-8 transition-colors">
           <FiArrowLeft /> Back to Products
         </Link>
 
         <div className="grid md:grid-cols-2 gap-10">
-          <div className="bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--accent-gold)]/20">
-            {/* Main Image with Zoom */}
+          <div className="bg-white rounded-corners-lg p-4 border border-forest/10">
             <div 
               ref={imageContainerRef}
-              className="relative w-full h-[400px] overflow-hidden rounded-lg cursor-crosshair"
+              className="relative w-full h-[400px] overflow-hidden rounded-corners-lg cursor-crosshair"
               onMouseEnter={() => setIsZoomed(true)}
               onMouseLeave={() => setIsZoomed(false)}
               onMouseMove={handleMouseMove}
@@ -206,7 +202,6 @@ const ProductDetails = () => {
                     alt={product.name}
                     className="w-full h-full object-contain"
                   />
-                  {/* Zoom Overlay */}
                   {isZoomed && (
                     <div 
                       className="absolute inset-0 pointer-events-none"
@@ -220,23 +215,22 @@ const ProductDetails = () => {
                   )}
                 </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)]">
+                <div className="w-full h-full flex items-center justify-center text-forest/40">
                   No Image Available
                 </div>
               )}
-            </div>
-            
-            {/* Image Thumbnails */}
-            {product.images?.length > 1 && (
+          </div>
+          
+          {product.images?.length > 1 && (
               <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
                 {product.images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImage(idx)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`flex-shrink-0 w-20 h-20 rounded-corners-lg overflow-hidden border-2 transition-all ${
                       activeImage === idx 
-                        ? 'border-[var(--accent-gold)]' 
-                        : 'border-[var(--accent-gold)]/20 hover:border-[var(--accent-gold)]'
+                        ? 'border-forest' 
+                        : 'border-forest/20 hover:border-forest/40'
                     }`}
                   >
                     <img
@@ -251,23 +245,23 @@ const ProductDetails = () => {
           </div>
 
           <div className="flex flex-col space-y-4">
-            <p className="text-[var(--accent-gold)] text-sm capitalize">{product.category}</p>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-[var(--text-primary)]">{product.name}</h1>
-            <p className="text-[var(--text-secondary)]">{product.description}</p>
+            <p className="text-forest/60 text-sm capitalize text-utility">{product.category}</p>
+            <h1 className="text-2xl md:text-3xl font-display text-forest">{product.name}</h1>
+            <p className="text-forest/70">{product.description}</p>
             
             <div className="flex items-center gap-4">
-              <span className="text-2xl font-bold text-[var(--accent-gold)]">₹ {product.price?.toLocaleString()}</span>
+              <span className="text-2xl font-bold text-forest">₹ {product.price?.toLocaleString()}</span>
               {product.numOfReviews > 0 && (
                 <div className="flex items-center gap-2">
                   <Rating value={product.rating || 0} disabled={true} />
-                  <span className="text-[var(--text-secondary)] text-sm">({product.numOfReviews} reviews)</span>
+                  <span className="text-forest/60 text-sm">({product.numOfReviews} reviews)</span>
                 </div>
               )}
             </div>
 
             <div className="flex items-center gap-2">
               {product.stock > 0 ? (
-                <span className="text-green-500 flex items-center gap-1">
+                <span className="text-green-600 flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   In Stock ({product.stock} available)
                 </span>
@@ -281,10 +275,10 @@ const ProductDetails = () => {
 
             {product.stock > 0 && (
               <div className="flex items-center gap-4 mt-4">
-                <div className="flex items-center border border-[var(--accent-gold)]/30 rounded-lg overflow-hidden">
+                <div className="flex items-center border-2 border-forest/20 rounded-lg overflow-hidden">
                   <button
                     onClick={decreaseQty}
-                    className="px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--accent-gold)]/20 transition"
+                    className="px-4 py-2 bg-olive text-forest hover:bg-forest/10 transition"
                     disabled={qty <= 1}
                   >
                     -
@@ -293,11 +287,11 @@ const ProductDetails = () => {
                     type="text"
                     readOnly
                     value={qty}
-                    className="w-12 text-center border-l border-r border-[var(--accent-gold)]/30 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                    className="w-12 text-center border-l border-r border-forest/20 bg-cream text-forest"
                   />
                   <button
                     onClick={increaseQty}
-                    className="px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--accent-gold)]/20 transition"
+                    className="px-4 py-2 bg-olive text-forest hover:bg-forest/10 transition"
                     disabled={qty >= product.stock}
                   >
                     +
@@ -306,7 +300,7 @@ const ProductDetails = () => {
 
                 <button
                   onClick={handleAddToCart}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--accent-gold)] to-[#b8960c] text-[var(--bg-primary)] font-semibold rounded-lg hover:shadow-lg hover:shadow-[var(--accent-gold)]/30 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-forest text-white font-semibold rounded-corners-lg hover:shadow-float transition-all"
                 >
                   <FiShoppingCart />
                   Add to Cart
@@ -317,23 +311,22 @@ const ProductDetails = () => {
         </div>
 
         <div className="mt-16">
-          <h3 className="text-2xl font-serif font-bold text-[var(--text-primary)] mb-6">Customer Reviews</h3>
+          <h3 className="text-2xl font-display text-forest mb-6">Customer Reviews</h3>
           
-          {/* Review Form - Only show if user is logged in */}
           {isAuthenticated && (
-            <form onSubmit={handleSubmitReview} className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-[var(--accent-gold)]/20 mb-8">
-              <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Write a Review</h4>
+            <form onSubmit={handleSubmitReview} className="bg-white rounded-corners-lg p-6 border border-forest/10 mb-8">
+              <h4 className="text-lg font-semibold text-forest mb-4">Write a Review</h4>
               <div className="mb-4">
-                <label className="block text-[var(--text-secondary)] text-sm mb-2">Rating</label>
+                <label className="block text-forest/60 text-sm mb-2">Rating</label>
                 <Rating value={rating} onRatingChange={setRating} disabled={submitting} />
               </div>
               <div className="mb-4">
-                <label className="block text-[var(--text-secondary)] text-sm mb-2">Your Review</label>
+                <label className="block text-forest/60 text-sm mb-2">Your Review</label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Share your thoughts about this product..."
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--accent-gold)]/20 rounded-lg px-4 py-3 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:outline-none"
+                  className="w-full bg-cream border border-forest/20 rounded-lg px-4 py-3 text-forest focus:border-forest focus:outline-none"
                   rows={4}
                   disabled={submitting}
                 />
@@ -341,7 +334,7 @@ const ProductDetails = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-2 bg-[var(--accent-gold)] text-[var(--bg-primary)] font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
+                className="px-6 py-2 bg-forest text-white font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
               >
                 {submitting ? "Submitting..." : "Submit Review"}
               </button>
@@ -349,7 +342,7 @@ const ProductDetails = () => {
           )}
           
           {!isAuthenticated && product.reviews?.length > 0 && (
-            <p className="text-[var(--text-secondary)] mb-4">Login to write a review</p>
+            <p className="text-forest/60 mb-4">Login to write a review</p>
           )}
           
           {product.reviews && product.reviews.length > 0 ? (
@@ -357,26 +350,25 @@ const ProductDetails = () => {
               {product.reviews.map((review, index) => (
                 <div
                   key={index}
-                  className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-[var(--accent-gold)]/20"
+                  className="bg-white rounded-corners-lg p-6 border border-forest/10"
                 >
                   <Rating value={review.rating} disabled={true} className="mb-2" />
-                  <p className="text-[var(--text-secondary)] mt-3">{review.comment}</p>
-                  <p className="text-[var(--accent-gold)] text-sm mt-2">- {review.name}</p>
+                  <p className="text-forest/70 mt-3">{review.comment}</p>
+                  <p className="text-forest text-sm mt-2">- {review.name}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[var(--text-secondary)]">No reviews yet. Be the first to review this product!</p>
+            <p className="text-forest/60">No reviews yet. Be the first to review this product!</p>
           )}
         </div>
 
-        {/* Related Products Section */}
         {relatedProducts.length > 0 && (
           <div className="mt-16">
-            <h3 className="text-2xl font-serif font-bold text-[var(--text-primary)] mb-6">
+            <h3 className="text-2xl font-display text-forest mb-6">
               Related Products
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="feature-grid">
               {relatedProducts.map((prod) => (
                 <ProductCard key={prod._id} product={prod} />
               ))}
@@ -384,13 +376,12 @@ const ProductDetails = () => {
           </div>
         )}
 
-        {/* Recommended Products Section */}
         {recommendedProducts.length > 0 && (
           <div className="mt-16">
-            <h3 className="text-2xl font-serif font-bold text-[var(--text-primary)] mb-6">
+            <h3 className="text-2xl font-display text-forest mb-6">
               Recommended For You
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="feature-grid">
               {recommendedProducts.map((prod) => (
                 <ProductCard key={prod._id} product={prod} />
               ))}

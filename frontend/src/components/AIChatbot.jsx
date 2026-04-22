@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { MdChat, MdClose, MdSend, MdAutoAwesome } from 'react-icons/md';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { MdChat, MdClose, MdSend, MdAutoAwesome } from "react-icons/md";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const AIChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I\'m ShopFusion AI Assistant. How can I help you today?' }
+    {
+      role: "assistant",
+      content: "Hello! I'm ShopFusion AI Assistant. How can I help you today?",
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -18,33 +21,41 @@ const AIChatbot = () => {
     if (!input.trim()) return;
 
     const userMessage = input.trim();
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setInput("");
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setLoading(true);
 
     try {
       const baseUrl = import.meta.env.VITE_SERVER_URL;
-      const response = await axios.post(`${baseUrl}/api/v1/ai/chat`, 
+      const response = await axios.post(
+        `${baseUrl}/api/v1/ai/chat`,
         { message: userMessage, userId: user?._id },
-        { withCredentials: true }
+        { withCredentials: true },
       );
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: response.data.response 
-      }]);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: response.data.response,
+        },
+      ]);
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, I\'m having trouble responding right now. Please try again.' 
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Sorry, I'm having trouble responding right now. Please try again.",
+        },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -67,7 +78,7 @@ const AIChatbot = () => {
           className="text-[var(--accent-gold)] underline hover:text-[var(--accent-gold)]/80 font-medium mx-1"
         >
           {match[2]}
-        </button>
+        </button>,
       );
       lastIndex = match.index + match[0].length;
     }
@@ -89,26 +100,42 @@ const AIChatbot = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-[var(--bg-secondary)] rounded-lg shadow-2xl border border-[var(--accent-gold)]/20 flex flex-col z-50">
+        <div
+          className="fixed bottom-0 right-0 w-full h-[85vh] sm:bottom-20 sm:right-6 sm:w-66 sm:h-[500px] 
+  bg-[var(--bg-secondary)] rounded-t-2xl sm:rounded-lg shadow-2xl border border-[var(--accent-gold)]/20 flex flex-col z-50
+"
+        >
           <div className="flex items-center justify-between p-4 border-b border-[var(--accent-gold)]/20">
             <div className="flex items-center gap-2">
               <MdAutoAwesome className="text-[var(--accent-gold)] text-xl" />
-              <h3 className="font-bold text-[var(--text-primary)]">AI Assistant</h3>
+              <h3 className="font-bold text-[var(--text-primary)]">
+                AI Assistant
+              </h3>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
               <MdClose className="text-xl" />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-lg ${
-                  msg.role === 'user' 
-                    ? 'bg-[var(--accent-gold)] text-[var(--bg-primary)]' 
-                    : 'bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent-gold)]/20'
-                }`}>
-                  {msg.role === 'assistant' ? renderMessageContent(msg.content) : msg.content}
+              <div
+                key={index}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    msg.role === "user"
+                      ? "bg-[var(--accent-gold)] text-[var(--bg-primary)]"
+                      : "bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--accent-gold)]/20"
+                  }`}
+                >
+                  {msg.role === "assistant"
+                    ? renderMessageContent(msg.content)
+                    : msg.content}
                 </div>
               </div>
             ))}
@@ -117,8 +144,14 @@ const AIChatbot = () => {
                 <div className="bg-[var(--bg-primary)] p-3 rounded-lg border border-[var(--accent-gold)]/20">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-[var(--accent-gold)] rounded-full animate-bounce"></span>
-                    <span className="w-2 h-2 bg-[var(--accent-gold)] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                    <span className="w-2 h-2 bg-[var(--accent-gold)] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                    <span
+                      className="w-2 h-2 bg-[var(--accent-gold)] rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 bg-[var(--accent-gold)] rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></span>
                   </div>
                 </div>
               </div>

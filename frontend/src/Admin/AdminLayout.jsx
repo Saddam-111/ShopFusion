@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
@@ -38,12 +37,12 @@ const AdminLayout = ({ children }) => {
   ];
 
   return (
-    <div className="bg-[var(--bg-primary)] min-h-screen">
+    <div className="bg-cream min-h-screen">
       
       {/* Mobile Menu Button */}
       <button 
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-gold)]/20 text-[var(--text-primary)]"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg border border-forest/20 text-forest"
       >
         {mobileMenuOpen ? <MdClose /> : <MdMenu />}
       </button>
@@ -52,29 +51,28 @@ const AdminLayout = ({ children }) => {
       <aside className={`
         fixed top-0 left-0 h-screen z-40
         ${sidebarCollapsed ? 'w-20' : 'w-64'}
-        bg-[var(--bg-secondary)] border-r border-[var(--accent-gold)]/20
+        bg-forest text-sage
         flex flex-col transition-all duration-300 ease-in-out
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         
         {/* Logo */}
-        <div className={`p-4 border-b border-[var(--accent-gold)]/20 flex items-center justify-between ${sidebarCollapsed ? 'justify-center' : ''}`}>
+        <div className={`p-4 border-b border-sage/20 flex items-center justify-between ${sidebarCollapsed ? 'justify-center' : ''}`}>
           
           {!sidebarCollapsed ? (
             <div>
-              <h1 className="text-xl font-serif font-bold text-[var(--accent-gold)]">Admin</h1>
-              <p className="text-[var(--text-secondary)] text-xs">ShopFusion</p>
+              <h1 className="text-xl font-display text-sage">Admin</h1>
+              <p className="text-sage/60 text-xs">ShopFusion</p>
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-[var(--accent-gold)]/20 flex items-center justify-center">
-              <span className="font-bold text-[var(--accent-gold)]">A</span>
+            <div className="w-10 h-10 rounded-full bg-sage/20 flex items-center justify-center">
+              <span className="font-display text-sage">A</span>
             </div>
           )}
 
-          {/* Toggle Button */}
           <button 
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:flex p-1 rounded hover:bg-[var(--bg-primary)] text-[var(--text-secondary)]"
+            className="hidden lg:flex p-1 rounded hover:bg-sage/10 text-sage"
           >
             {sidebarCollapsed ? <MdChevronRight /> : <MdChevronLeft />}
           </button>
@@ -92,8 +90,8 @@ const AdminLayout = ({ children }) => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] border-l-2 border-[var(--accent-gold)]'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]'
+                        ? 'bg-sage/20 text-sage border-l-2 border-sage'
+                        : 'text-sage/60 hover:bg-sage/10 hover:text-sage'
                     } ${sidebarCollapsed ? 'justify-center' : ''}`
                   }
                 >
@@ -106,28 +104,28 @@ const AdminLayout = ({ children }) => {
         </nav>
 
         {/* Footer */}
-        <div className={`p-3 border-t border-[var(--accent-gold)]/20 ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
+        <div className={`p-3 border-t border-sage/20 ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
           
           <div className={`flex items-center gap-3 mb-3 ${sidebarCollapsed ? 'justify-center' : 'px-3'}`}>
-            <div className="w-9 h-9 rounded-full bg-[var(--accent-gold)]/20 flex items-center justify-center flex-shrink-0">
-              <span className="font-bold text-[var(--accent-gold)] text-sm">
+            <div className="w-9 h-9 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
+              <span className="font-bold text-sage text-sm">
                 {user?.name?.charAt(0).toUpperCase()}
               </span>
             </div>
 
             {!sidebarCollapsed && (
               <div className="overflow-hidden">
-                <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                <p className="text-sm font-medium text-sage truncate">
                   {user?.name}
                 </p>
-                <p className="text-xs text-[var(--text-secondary)]">Admin</p>
+                <p className="text-xs text-sage/60">Admin</p>
               </div>
             )}
           </div>
 
           <button
             onClick={handleLogout}
-            className={`flex items-center gap-2 px-3 py-2 w-full text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 ${
+            className={`flex items-center gap-2 px-3 py-2 w-full text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 ${
               sidebarCollapsed ? 'justify-center' : ''
             }`}
           >
@@ -149,10 +147,9 @@ const AdminLayout = ({ children }) => {
       <main className={`
         min-h-screen transition-all duration-300 ease-in-out
         ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}
+        p-4 lg:p-6 xl:p-8 max-w-7xl mx-auto
       `}>
-        <div className="p-4 lg:p-6 xl:p-8 max-w-7xl mx-auto">
-          {children}
-        </div>
+        {children}
       </main>
 
     </div>
@@ -160,4 +157,3 @@ const AdminLayout = ({ children }) => {
 };
 
 export default AdminLayout;
-

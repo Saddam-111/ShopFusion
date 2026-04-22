@@ -1,246 +1,188 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProduct } from '../redux/productSlice';
-import Loader from '../components/Loader';
-import AIRecommendations from '../components/AIRecommendations';
-import { MdArrowForward, MdVerified, MdSecurity, MdSupport, MdLocalShipping } from 'react-icons/md';
+import { FiArrowRight, FiShield, FiLock, FiHeadphones, FiTruck, FiStar } from 'react-icons/fi';
+import { ProductCard } from '../components/ui/ProductCard';
 
 const Home = () => {
   const dispatch = useDispatch();
   const { products, loading } = useSelector((state) => state.product);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     dispatch(getProduct({ page: 1 }));
   }, [dispatch]);
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth) * 20,
+        y: (e.clientY / window.innerHeight) * 20
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const categories = [
-    { name: 'Laptop', image: '💻', count: '150+' },
-    { name: 'Mobile', image: '📱', count: '200+' },
-    { name: 'Television', image: '📺', count: '80+' },
-    { name: 'Camera', image: '📷', count: '60+' },
-    { name: 'Headphone', image: '🎧', count: '120+' },
+    { name: 'Laptop', icon: '💻', count: '150+' },
+    { name: 'Mobile', icon: '📱', count: '200+' },
+    { name: 'TV', icon: '📺', count: '80+' },
+    { name: 'Camera', icon: '📷', count: '60+' },
+    { name: 'Audio', icon: '🎧', count: '120+' },
   ];
 
   const features = [
-    {
-      icon: <MdVerified className="text-3xl" />,
-      title: '100% Authentic',
-      description: 'All products are guaranteed genuine'
-    },
-    {
-      icon: <MdSecurity className="text-3xl" />,
-      title: 'Secure Payment',
-      description: 'Multiple payment options with encryption'
-    },
-    {
-      icon: <MdSupport className="text-3xl" />,
-      title: '24/7 Support',
-      description: 'Dedicated customer service team'
-    },
-    {
-      icon: <MdLocalShipping className="text-3xl" />,
-      title: 'Fast Delivery',
-      description: 'Express shipping across India'
-    }
+    { icon: <FiShield />, title: '100% Authentic' },
+    { icon: <FiLock />, title: 'Secure Payment' },
+    { icon: <FiHeadphones />, title: '24/7 Support' },
+    { icon: <FiTruck />, title: 'Fast Delivery' },
   ];
 
   return (
-    <div className="min-h-screen bg-art-black text-art-white">
+    <div className="min-h-screen bg-cream text-forest">
       {/* Hero Section */}
-      <div className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-art-black via-art-black/80 to-transparent z-10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(212,175,55,0.15)_0%,_transparent_50%)]" />
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-sage">
+        <div className="noise-overlay" />
         
-        <div className="absolute top-20 right-10 w-72 h-72 bg-art-gold/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-art-gold/5 rounded-full blur-3xl" />
-
-        <div className="max-w-7xl mx-auto px-6 py-20 relative z-20">
-          <div className="max-w-3xl">
-            <p className="text-art-gold uppercase tracking-[0.3em] text-sm mb-4 animate-fade-in">
-              Welcome to ShopFusion
-            </p>
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-art-white leading-tight mb-6">
-              Discover 
-              <span className="text-gradient-gold"> Luxury</span>
-              <br />Shopping
+        {/* Floating organic elements with parallax */}
+        <div 
+          className="absolute top-20 right-[5%] w-32 h-32 md:w-48 md:h-48 rounded-corners-lg bg-olive/40 animate-float hidden sm:block"
+          style={{ transform: `translateY(${mousePosition.y * 0.5}px) rotate(${mousePosition.x * 0.3}deg)` }}
+        />
+        <div 
+          className="absolute bottom-32 left-[5%] w-20 h-20 md:w-32 md:h-32 rounded-corners-lg bg-moss/30 animate-float hidden sm:block"
+          style={{ transform: `translateY(${mousePosition.y * -0.3}px) rotate(${mousePosition.x * -0.2}deg)`, animationDelay: '1s' }}
+        />
+        <div 
+          className="absolute top-1/3 left-[10%] w-16 h-16 md:w-24 md:h-24 rounded-corners-lg bg-forest/20 animate-float hidden sm:block"
+          style={{ transform: `translateY(${mousePosition.y * 0.4}px) rotate(${mousePosition.x * 0.4}deg)`, animationDelay: '2s' }}
+        />
+        
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-20 relative z-10 w-full">
+          <div className="min-w-2xl md:min-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-forest/10 border border-forest/20 rounded-full mb-4 md:mb-6">
+              <FiStar className="text-forest" size={12} md:size={14} />
+              <span className="text-forest text-xs md:text-sm font-semibold text-utility">New Collection 2026</span>
+            </div>
+            
+            {/* Hero Text - Responsive sizing */}
+            <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-display text-forest mb-4 md:mb-6 leading-tight md:leading-none overflow-hidden">
+              SHOP<br className="hidden md:block" />
+              FUSION
             </h1>
-            <p className="text-art-silver text-xl mb-8 max-w-xl leading-relaxed">
-              Experience premium products with exceptional quality. 
-              Your destination for the finest selection of electronics and more.
+            
+            <p className="text-base md:text-xl text-forest/70 mb-6 md:mb-10 min-w-lg">
+              Premium electronics & accessories. Quality you trust, prices you'll love.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-art-gold to-art-gold-dark text-art-black font-semibold rounded-lg hover:shadow-lg hover:shadow-art-gold/30 transition-all group"
-              >
-                Shop Now
-                <MdArrowForward className="group-hover:translate-x-1 transition-transform" />
+            
+            <div className="flex flex-wrap gap-3 md:gap-4">
+              <Link to="/products" className="btn btn-primary text-sm md:text-base">
+                Shop Now <FiArrowRight />
               </Link>
-              <Link
-                to="/about"
-                className="inline-flex items-center gap-2 px-8 py-4 border-2 border-art-gold/30 text-art-gold font-semibold rounded-lg hover:border-art-gold hover:bg-art-gold/10 transition-all"
-              >
-                Learn More
+              <Link to="/about" className="btn btn-secondary text-sm md:text-base">
+                About Us
               </Link>
             </div>
           </div>
+          
+          {/* Location/Origin labels - Responsive */}
+          <div className="flex flex-wrap items-center gap-4 md:gap-8 mt-8 md:mt-12 text-xs md:text-sm text-forest/60">
+            <span>Made in India</span>
+            <span className="w-1 h-1 bg-forest/30 rounded-full hidden sm:block" />
+            <span>Worldwide Shipping</span>
+            <span className="w-1 h-1 bg-forest/30 rounded-full hidden sm:block" />
+            <span>Premium Quality</span>
+          </div>
         </div>
-
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/3 h-full bg-gradient-to-l from-art-gold/5 to-transparent" />
-      </div>
+      </section>
 
       {/* Features Bar */}
-      <div className="bg-art-charcoal border-y border-art-gold/10">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <div className="text-art-gold">{feature.icon}</div>
+      <section className="bg-olive py-4 md:py-6 border-t border-forest/10">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {features.map((f, i) => (
+              <div key={i} className="flex items-center gap-2 md:gap-4 p-3 md:p-4 rounded-corners-lg bg-cream/50 hover:bg-cream hover:-translate-y-1 transition-all duration-300">
+                <div className="text-forest text-lg md:text-2xl">{f.icon}</div>
                 <div>
-                  <p className="text-art-white font-medium text-sm">{feature.title}</p>
-                  <p className="text-art-silver text-xs">{feature.description}</p>
+                  <p className="text-forest font-semibold text-xs md:text-sm">{f.title}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Categories Section */}
-      <div className="py-20 px-6">
+      {/* Categories */}
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-olive rounded-t-corners-xl">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-art-white mb-4">
-              Shop by Category
-            </h2>
-            <p className="text-art-silver">Explore our wide range of products</p>
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-display text-forest">Categories</h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {categories.map((cat, index) => (
-              <Link
-                key={index}
-                to={`/products?category=${cat.name.toLowerCase()}`}
-                className="group p-6 bg-art-charcoal rounded-xl border border-art-gold/10 hover:border-art-gold/30 transition-all text-center hover:-translate-y-1"
-              >
-                <span className="text-4xl mb-3 block">{cat.image}</span>
-                <h3 className="text-art-white font-semibold group-hover:text-art-gold transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="text-art-silver text-sm">{cat.count} Products</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+            {categories.map((c, i) => (
+              <Link key={i} to={`/products?category=${c.name.toLowerCase()}`}
+                className="group p-4 md:p-8 bg-cream rounded-corners-lg border-2 border-transparent hover:border-forest/30 hover:-translate-y-2 hover:shadow-float-tinted transition-all duration-300 text-center">
+                <span className="text-3xl md:text-5xl mb-2 md:mb-4 block group-hover:scale-110 transition-transform">{c.icon}</span>
+                <h3 className="text-forest font-semibold text-sm md:text-lg mb-1 group-hover:text-forest">{c.name}</h3>
+                <p className="text-forest/60 text-xs md:text-sm">{c.count}+ Products</p>
               </Link>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Trending Products */}
-      <div className="py-20 px-6 bg-art-charcoal/30">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-cream">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-12 gap-4">
             <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-art-white mb-2">
-                Trending Now
-              </h2>
-              <p className="text-art-silver">Most popular products this month</p>
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-display text-forest">Trending</h2>
+              <p className="text-forest/60 mt-1 md:mt-2">Most popular this month</p>
             </div>
-            <Link
-              to="/products"
-              className="hidden md:inline-flex items-center gap-2 text-art-gold hover:text-art-gold-light transition-colors"
-            >
-              View All <MdArrowForward />
+            <Link to="/products" className="flex items-center gap-2 text-forest hover:text-forest/70 text-sm md:text-base">
+              View All <FiArrowRight />
             </Link>
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader />
-            </div>
-          ) : products?.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {products.slice(0, 8).map((product) => (
-                <Link
-                  key={product._id}
-                  to={`/product/${product._id}`}
-                  className="group bg-art-charcoal rounded-xl overflow-hidden border border-art-gold/10 hover:border-art-gold/30 transition-all hover:-translate-y-2"
-                >
-                  <div className="aspect-square overflow-hidden bg-art-black">
-                    {product.images?.[0]?.url ? (
-                      <img
-                        src={product.images[0].url}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-art-silver">
-                        No Image
-                      </div>
-                    )}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {[1,2,3,4,5,6,7,8].map((i) => (
+                <div key={i} className="bg-olive rounded-corners-lg overflow-hidden">
+                  <div className="aspect-[4/5] skeleton" />
+                  <div className="p-4 space-y-3">
+                    <div className="skeleton skeleton-text w-3/4" />
+                    <div className="skeleton skeleton-text w-1/2" />
                   </div>
-                  <div className="p-4">
-                    <p className="text-art-silver text-sm">{product.category}</p>
-                    <h3 className="text-art-white font-semibold mt-1 line-clamp-1 group-hover:text-art-gold transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-art-gold font-bold text-lg">
-                        ₹{product.price?.toLocaleString()}
-                      </span>
-                      <span className={`text-xs px-2 py-1 rounded ${product.stock > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                        {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-20 text-art-silver">
-              No products available yet
+          ) : products?.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {products.slice(0, 8).map((p) => <ProductCard key={p._id} product={p} />)}
             </div>
+          ) : (
+            <div className="text-center py-12 md:py-20 text-forest/60">No products available</div>
           )}
-
-          <div className="text-center mt-8 md:hidden">
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 text-art-gold"
-            >
-              View All Products <MdArrowForward />
-            </Link>
-          </div>
         </div>
-      </div>
-
-      <AIRecommendations />
+      </section>
 
       {/* CTA Section */}
-      <div className="py-20 px-6">
+      <section className="py-12 md:py-20 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="relative bg-gradient-to-r from-art-gold/20 to-art-gold/5 rounded-2xl p-12 text-center overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-art-gold/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-art-gold/10 rounded-full blur-3xl" />
-            
+          <div className="relative bg-olive rounded-corners-xl p-8 md:p-16 text-center overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-forest/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 md:w-48 md:h-48 bg-moss/20 rounded-full blur-3xl" />
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-art-white mb-4">
-                Ready to Start Shopping?
-              </h2>
-              <p className="text-art-silver mb-8 max-w-xl mx-auto">
-                Join thousands of satisfied customers and discover the best products at unbeatable prices.
-              </p>
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-art-gold to-art-gold-dark text-art-black font-semibold rounded-lg hover:shadow-lg hover:shadow-art-gold/30 transition-all"
-              >
-                Browse Products
-                <MdArrowForward />
-              </Link>
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-display text-forest mb-4 md:mb-6">Upgrade Your Tech</h2>
+              <p className="text-forest/70 mb-6 md:mb-8">Explore our latest collection today.</p>
+              <Link to="/products" className="btn btn-primary">Browse Products <FiArrowRight /></Link>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Footer handled by App component */}
+      </section>
     </div>
   );
 };

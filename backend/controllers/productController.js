@@ -2,12 +2,10 @@ import { uploadCloudinary } from "../config/cloudinary.js";
 import { Product } from "../models/productModel.js"
 import ApiFunctionality from "../utils/ApiFunctionality.js"
 
-// Create Product
 export const createProducts = async (req, res) => {
   try {
     req.body.user = req.user.id;
     let images = [];
-    //handle multiple product images 
     if(req.files && req.files.length > 0){
       for(const file of req.files){
         const uploadCloudinaryImage = await uploadCloudinary(file.path, "products");
@@ -32,19 +30,14 @@ export const createProducts = async (req, res) => {
   }
 }
 
-// Get All Products
 export const getAllProducts = async (req, res) => {
   try {
     const resultPerPage = 6;
     const apiFeatures = new ApiFunctionality(Product.find(), req.query).search().filter()
 
-
-    //console.log(apiFunctionality)
-    //getting filtered query befire pagination
     const filteredQuery = apiFeatures.query.clone()
     const productCount = await filteredQuery.countDocuments();
 
-    //calculate totalpages based on filtered count
     const totalPages = Math.ceil(productCount/resultPerPage);
     const page = Number(req.query.page) || 1;
 
@@ -55,7 +48,6 @@ export const getAllProducts = async (req, res) => {
       })
     }
 
-    //apply pagination
     apiFeatures.pagination(resultPerPage);
 
     const products = await apiFeatures.query
@@ -80,7 +72,6 @@ export const getAllProducts = async (req, res) => {
   }
 }
 
-// Get Single Product
 export const getSingleProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
@@ -106,7 +97,6 @@ export const getSingleProduct = async (req, res) => {
   }
 }
 
-// Update Product
 export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
@@ -136,7 +126,6 @@ export const updateProduct = async (req, res) => {
   }
 }
 
-// Delete Product
 export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
@@ -161,7 +150,6 @@ export const deleteProduct = async (req, res) => {
   }
 }
 
-// Creating and Updating reviews
 export const createReviewForProduct = async (req, res) => {
   try {
     const { rating, comment, productId } = req.body;
@@ -196,7 +184,6 @@ export const createReviewForProduct = async (req, res) => {
       product.reviews.push(review);
     }
 
-    // Update numOfReviews and average rating
     product.numOfReviews = product.reviews.length;
     product.rating = product.reviews.length
       ? product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length
@@ -217,7 +204,6 @@ export const createReviewForProduct = async (req, res) => {
 };
 
 
-//Getting reviews 
 export const getProductReviews = async (req , res) => {
   try {
     const product = await Product.findById(req.query.id);
@@ -239,7 +225,6 @@ export const getProductReviews = async (req , res) => {
   }
 }
 
-//Delete reviews
 export const deleteReview = async (req , res) => {
   try {
     const product = await Product.findById(req.query.productId)
@@ -294,7 +279,6 @@ export const deleteReview = async (req , res) => {
 
 
 
-//Admin = getting all product
 export const getAdminProducts = async (req, res) => {
   try {
     const { page = 1, limit = 10, search, category, stock, minPrice, maxPrice, sort } = req.query;

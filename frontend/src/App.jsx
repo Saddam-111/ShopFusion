@@ -28,13 +28,17 @@ import Footer from "./components/Footer";
 import { SocketProvider } from "./context/SocketContext";
 import AIChatbot from "./components/AIChatbot";
 
+const NoiseOverlay = () => (
+  <div className="noise-overlay" />
+);
+
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.user);
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-art-black flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-art-gold/30 border-t-art-gold animate-spin rounded-full" />
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-forest/30 border-t-forest animate-spin rounded-full" />
       </div>
     );
   }
@@ -68,11 +72,12 @@ const App = () => {
     <SocketProvider>
       <ThemeProvider>
         <Router>
-          <div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]">
+          <div className="min-h-screen flex flex-col bg-cream text-forest">
+            <NoiseOverlay />
             <ToastContainer 
               position="top-right"
               autoClose={3000}
-              theme="dark"
+              theme="light"
             />
             <Routes>
               <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
@@ -91,9 +96,9 @@ const App = () => {
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
               <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-<Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+              <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
               <Route path="/admin/coupons" element={<AdminRoute><AdminCoupons /></AdminRoute>} />
-               
+                
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
             <AIChatbot />
